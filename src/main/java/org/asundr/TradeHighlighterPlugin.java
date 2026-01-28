@@ -29,9 +29,14 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.client.Notifier;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
@@ -42,19 +47,25 @@ import net.runelite.client.plugins.PluginDescriptor;
 public class TradeHighlighterPlugin extends Plugin
 {
 	@Inject private Client client;
-
+	@Inject private ClientThread clientThread;
 	@Inject private TradeHighligherConfig config;
+	@Inject private OverlayManager overlayManager;
+	@Inject private ItemManager itemManager;
+	@Inject private EventBus eventBus;
+	@Inject private Notifier notifier;
+
+	private TradeHighlightManager tradeHighlightManager;
 
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.debug("Example started!");
+		tradeHighlightManager = new TradeHighlightManager(client, clientThread, overlayManager, itemManager, eventBus, config, notifier);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.debug("Example stopped!");
+		tradeHighlightManager.shutdown(overlayManager, eventBus);
 	}
 
 	@Provides TradeHighligherConfig provideConfig(ConfigManager configManager) { return configManager.getConfig(TradeHighligherConfig.class); }
