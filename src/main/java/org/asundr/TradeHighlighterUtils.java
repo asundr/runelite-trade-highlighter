@@ -25,20 +25,31 @@
 
 package org.asundr;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 
 import java.awt.*;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class TradeHighlighterUtils
 {
     @Getter private static ItemManager itemManager;
     @Getter private static TradeHighligherConfig config;
+    private static ConfigManager configManager;
 
-    public static void initialize(TradeHighligherConfig config, ItemManager itemManager)
+    private static Gson gson;
+
+    public static void initialize(TradeHighligherConfig config, ConfigManager configManager, ItemManager itemManager, Gson gson)
     {
         TradeHighlighterUtils.config = config;
+        TradeHighlighterUtils.configManager = configManager;
         TradeHighlighterUtils.itemManager = itemManager;
+        TradeHighlighterUtils.gson = gson;
     }
 
     public static Color lerp(final Color a, final Color b, final float alpha)
@@ -53,5 +64,36 @@ public class TradeHighlighterUtils
     public static int lerp(int a, int b, float alpha)
     {
         return (int)((1f - alpha)*(float)a + alpha*(float)b);
+    }
+
+    public static Gson getGsonBuilder()
+    {
+        return gson.newBuilder().create();
+    }
+
+    public static void saveDefinitions()
+    {
+        final Collection<HighlightDefinition> definitions = TradeHighlighterPlugin.tradeHighlightManager.definitions.values();
+        Gson builder = TradeHighlighterUtils.getGsonBuilder();
+        String json = builder.toJson(definitions);
+        configManager.setConfiguration(config.CONFIG_GROUP, "definitions", json);
+    }
+
+    public static void loadDefinitions()
+    {
+        Gson builder = TradeHighlighterUtils.getGsonBuilder();
+        String json = configManager.getConfiguration(config.CONFIG_GROUP, "definitions");
+        if (json == null)
+        {
+            return;
+        }
+        Type type = new TypeToken<Collection<HighlightDefinition>>(){}.getType();
+        Collection<HighlightDefinition> definitionValues = builder.fromJson(json, type);
+        HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
+        for (HighlightDefinition definition : definitionValues)
+        {
+            definitions.put(definition.getId(), definition);
+        }
+        TradeHighlighterPlugin.tradeHighlightManager.refreshDefinition(definitions);
     }
 }

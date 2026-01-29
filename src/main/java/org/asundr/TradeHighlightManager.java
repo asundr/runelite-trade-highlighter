@@ -25,6 +25,7 @@
 
 package org.asundr;
 
+import com.google.gson.Gson;
 import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.events.ItemContainerChanged;
@@ -60,7 +61,7 @@ public class TradeHighlightManager
     private final OverlayManager overlayManager;
 
     final TradeHighlightOverlay tradeHighlightOverlay;
-    final HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
+    HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
     final ArrayList<Widget> highlighted = new ArrayList<>();
     HashSet<Integer> previousIds = new HashSet<>();
 
@@ -153,6 +154,7 @@ public class TradeHighlightManager
             definition.setName(itemManager.getItemComposition(definition.getId()).getMembersName());
             definitions.put(definition.getId(), definition);
             eventBus.post(new EventDefinitionAdded(definition));
+            TradeHighlighterUtils.saveDefinitions();
         });
     }
 
@@ -163,8 +165,20 @@ public class TradeHighlightManager
             return;
         }
         eventBus.post(new EventDefinitionRemoved(definitions.remove(itemId)));
+        TradeHighlighterUtils.saveDefinitions();
     }
 
-
+    public void refreshDefinition(final HashMap<Integer, HighlightDefinition> definitions)
+    {
+        clientThread.invoke(() ->
+        {
+            for (HighlightDefinition definition : definitions.values())
+            {
+                definition.setName(itemManager.getItemComposition(definition.getId()).getMembersName());
+            }
+            this.definitions = definitions;
+            eventBus.post(new EventDefinitionsRefreshed(definitions));
+        });
+    }
 
 }

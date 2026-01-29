@@ -34,6 +34,7 @@ import net.runelite.client.ui.components.IconTextField;
 import net.runelite.http.api.item.ItemPrice;
 import org.asundr.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.*;
@@ -131,6 +132,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     @Subscribe private void onEventDefinitionAdded(EventDefinitionAdded evt) { addDefinitionPanel(evt.getDefinition()); }
 
     @Subscribe private void onEventDefinitionRemoved(EventDefinitionRemoved evt) { removeDefinitionPanel(evt.getDefinition()); }
+    @Subscribe private void onEventDefinitionsRefreshed(EventDefinitionsRefreshed evt) { refreshDefinitionPanel(evt.getDefinitions()); }
 
     private JPanel buildDefinitionsToolbar()
     {
@@ -233,6 +235,18 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                 }
             }
         }
+    }
+
+    private void refreshDefinitionPanel(final HashMap<Integer, HighlightDefinition> definitions)
+    {
+        SwingUtilities.invokeLater(()->{
+            for (HighlightDefinition definition : definitions.values())
+            {
+                final HighlightDefinitionPanel highlightDefinitionPanel = new HighlightDefinitionPanel(definition, tradeHighlightManager);
+                definitionListPanel.add(highlightDefinitionPanel);
+            }
+            SwingUtilities.invokeLater(definitionListPanel::updateUI);
+        });
     }
 
     public void setTab(PanelTab tab)

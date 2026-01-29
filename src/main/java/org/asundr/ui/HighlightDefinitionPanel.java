@@ -120,6 +120,7 @@ public class HighlightDefinitionPanel extends JPanel
                         definition.setColor(c);
                         colorButton.setBackground(c);
                         setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, c, BACKGROUND_COLOR_ALPHA));
+                        TradeHighlighterUtils.saveDefinitions();
                     });
                     colorPicker.setLocationRelativeTo(colorButton);
                     colorPicker.setVisible(true);
@@ -138,7 +139,10 @@ public class HighlightDefinitionPanel extends JPanel
     {
         JCheckBox checkbox = new JCheckBox();
         checkbox.setSelected(definition.getNotify());
-        checkbox.addActionListener(e -> { definition.setNotify(checkbox.isSelected()); });
+        checkbox.addActionListener(e -> {
+            definition.setNotify(checkbox.isSelected());
+            TradeHighlighterUtils.saveDefinitions();
+        });
         checkbox.setToolTipText("Enable to send notification when this item is offered by the other player");
         add(checkbox);
     }

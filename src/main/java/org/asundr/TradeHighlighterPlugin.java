@@ -25,6 +25,7 @@
 
 package org.asundr;
 
+import com.google.gson.Gson;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import javax.swing.*;
@@ -65,8 +66,11 @@ public class TradeHighlighterPlugin extends Plugin
 	@Inject private Notifier notifier;
 	@Inject private ClientToolbar clientToolbar;
 	@Inject private ColorPickerManager colorPickerManager;
+	@Inject private Gson gson;
+	@Inject private ConfigManager configManager;
 
-	private TradeHighlightManager tradeHighlightManager;
+	static TradeHighlightManager tradeHighlightManager;
+
 	private NavigationButton navigationButton;
 	private TradeHighlighterPluginPanel mainPanel;
 
@@ -74,13 +78,15 @@ public class TradeHighlighterPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		TradeHighlighterUtils.initialize(config, itemManager);
+		TradeHighlighterUtils.initialize(config, configManager, itemManager, gson);
 		HighlightDefinitionPanel.initialize(client, itemManager, colorPickerManager);
 		TradeHighlighterPluginPanel.initialize(clientThread);
 		tradeHighlightManager = new TradeHighlightManager(client, clientThread, overlayManager, itemManager, eventBus, config, notifier);
 		mainPanel = new TradeHighlighterPluginPanel(tradeHighlightManager);
 		eventBus.register(mainPanel);
 		addNavigationButton(mainPanel);
+
+		TradeHighlighterUtils.loadDefinitions();
 	}
 
 	@Override
