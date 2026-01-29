@@ -25,39 +25,72 @@
 
 package org.asundr.ui;
 
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.ItemComposition;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.PluginPanel;
-import org.asundr.EventDefinitionAdded;
-import org.asundr.EventDefinitionRemoved;
-import org.asundr.HighlightDefinition;
-import org.asundr.TradeHighlightManager;
+import net.runelite.client.ui.components.IconTextField;
+import net.runelite.http.api.item.ItemPrice;
+import org.asundr.*;
+
+import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+@Slf4j
 public class TradeHighlighterPluginPanel extends PluginPanel
 {
+    enum PanelTab
+    {
+        DEFINITIONS,
+        ADD_NEW
+    }
     public static int PANEL_WIDTH;
 
     static ClientThread clientThread;
 
     private final TradeHighlightManager tradeHighlightManager;
 
+
+    private PanelTab currentTab = PanelTab.DEFINITIONS;
+    private final JPanel definitionsMainPanel = new JPanel();
     private final JPanel definitionListPanel = new JPanel();
+    private final JPanel searchMainPanel = new JPanel();
+    private final JPanel searchListPanel = new JPanel();
+    private final IconTextField itemSearchBar = new IconTextField();
 
 
     public TradeHighlighterPluginPanel(TradeHighlightManager tradeHighlightManager)
     {
         super(false); // disables scrolling
         TradeHighlighterPluginPanel.PANEL_WIDTH = getPreferredSize().width;
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        buildToolbar();
 
         this.tradeHighlightManager = tradeHighlightManager;
+        SearchItemPanel.mainPanel = this;
+
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+        buildDefinitionsPanel();
+        buildSearchPanel();
+
+        definitionsMainPanel.setVisible(true);
+        searchMainPanel.setVisible(false);
+    }
+
+    public static void initialize(ClientThread clientThread)
+    {
+        TradeHighlighterPluginPanel.clientThread = clientThread;
+    }
+
+    private void buildDefinitionsPanel()
+    {
+        definitionsMainPanel.setLayout(new BorderLayout());
+
+        final JPanel toolbar = buildDefinitionsToolbar();
 
         definitionListPanel.setLayout(new BoxLayout(definitionListPanel, BoxLayout.Y_AXIS));
         //set border?
@@ -70,31 +103,101 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         customScrollBar.setPreferredSize(preferredSize);
         definitionHistoryScroll.setVerticalScrollBar(customScrollBar);
 
-        add(definitionHistoryScroll);
+        definitionsMainPanel.add(toolbar, BorderLayout.NORTH);
+        definitionsMainPanel.add(definitionHistoryScroll, BorderLayout.CENTER);
+
+        add(definitionsMainPanel);
     }
 
-    public static void initialize(ClientThread clientThread)
+    private void buildSearchPanel()
     {
-        TradeHighlighterPluginPanel.clientThread = clientThread;
+        searchMainPanel.setLayout(new BorderLayout());
+
+        JPanel toolbar = buildSearchToolbar();
+
+        searchListPanel.setLayout(new BoxLayout(searchListPanel, BoxLayout.Y_AXIS));
+        JScrollPane searchListScroll = new JScrollPane(searchListPanel);
+        searchListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        searchListScroll.setPreferredSize(new Dimension(PANEL_WIDTH, 2000));
+
+        searchMainPanel.add(toolbar, BorderLayout.NORTH);
+        searchMainPanel.add(searchListScroll, BorderLayout.CENTER);
+
+
+        add(searchMainPanel);
     }
+
 
     @Subscribe private void onEventDefinitionAdded(EventDefinitionAdded evt) { addDefinitionPanel(evt.getDefinition()); }
 
     @Subscribe private void onEventDefinitionRemoved(EventDefinitionRemoved evt) { removeDefinitionPanel(evt.getDefinition()); }
 
-    private void buildToolbar()
+    private JPanel buildDefinitionsToolbar()
     {
         JPanel toolbar = new JPanel();
-
         JButton addDefinitionButton = new JButton("+");
-        addDefinitionButton.addActionListener(new ActionListener() {
-            @Override public void actionPerformed(ActionEvent e) {
-                tradeHighlightManager.addDefinition(new HighlightDefinition(995, Color.pink, true));
-            }
-        });
+        addDefinitionButton.addActionListener(e -> setTab(PanelTab.ADD_NEW));
         toolbar.add(addDefinitionButton);
+        return toolbar;
+    }
 
-        add(toolbar);
+    private JPanel buildSearchToolbar()
+    {
+        final JPanel toolbar = new JPanel();
+        JButton backToDefinitionsButton = new JButton("◁");
+        backToDefinitionsButton.addActionListener(e -> setTab(PanelTab.DEFINITIONS));
+
+        itemSearchBar.setIcon(IconTextField.Icon.SEARCH);
+//        searchBar.addActionListener(e -> executor.execute(() -> priceLookup(false)));
+        itemSearchBar.addActionListener(e -> updateSearchList());
+
+        toolbar.add(backToDefinitionsButton);
+        toolbar.add(itemSearchBar);
+        //toolbar.
+        return toolbar;
+    }
+
+    private void updateSearchList()
+    {
+        searchListPanel.removeAll();
+        final String searchQuery = itemSearchBar.getText();
+        if (searchQuery.isBlank())
+        {
+            SwingUtilities.invokeLater(searchListPanel::updateUI);
+            return;
+        }
+        final List<ItemPrice> result = TradeHighlighterUtils.getItemManager().search(searchQuery);
+        if (result.isEmpty())
+        {
+            itemSearchBar.setIcon(IconTextField.Icon.ERROR);
+            //errorPanel.setContent("No results found.", "No items were found with that name, please try again.");
+            //cardLayout.show(centerPanel, ERROR_PANEL);
+            itemSearchBar.setEditable(true);
+            return;
+        }
+        //clientThread.invokeLater(() -> processResult(result, searchQuery, exactMatch));
+        clientThread.invoke(() ->{
+        for (final ItemPrice item : result)
+        {
+            int id = item.getId();
+            final ItemComposition comp = TradeHighlighterUtils.getItemManager().getItemComposition(id);
+            if (!comp.isTradeable())
+            {
+                continue;
+            }
+            if (comp.getNote() != -1)
+            {
+                id = comp.getLinkedNoteId();
+            }
+            if (tradeHighlightManager.hasDefinition(id))
+            {
+                continue;
+            }
+            final String name = comp.getMembersName();
+            searchListPanel.add(new SearchItemPanel(id, name));
+        }
+        });
+        SwingUtilities.invokeLater(searchListPanel::updateUI);
     }
 
     private void addDefinitionPanel(HighlightDefinition definition)
@@ -130,5 +233,27 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                 }
             }
         }
+    }
+
+    public void setTab(PanelTab tab)
+    {
+        if (tab == currentTab)
+        {
+            return;
+        }
+        definitionsMainPanel.setVisible(false);
+        searchMainPanel.setVisible(false);
+        switch (tab)
+        {
+            case DEFINITIONS:
+                itemSearchBar.setText("");
+                definitionsMainPanel.setVisible(true); break;
+            case ADD_NEW:
+                searchMainPanel.setVisible(true); break;
+            default:
+                log.warn("Unhandled tab in TradeHighlightPluginPanel::setTab()");
+        }
+        currentTab = tab;
+        SwingUtilities.invokeLater(this::updateUI);
     }
 }

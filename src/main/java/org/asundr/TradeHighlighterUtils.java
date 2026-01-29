@@ -25,10 +25,33 @@
 
 package org.asundr;
 
-public class EventDefinitionAdded
-{
-    private final HighlightDefinition definition;
-    EventDefinitionAdded(final HighlightDefinition definition) { this.definition = definition; }
-    public HighlightDefinition getDefinition() { return definition; }
-}
+import lombok.Getter;
+import net.runelite.client.game.ItemManager;
 
+import java.awt.*;
+
+public class TradeHighlighterUtils
+{
+    @Getter private static ItemManager itemManager;
+    @Getter private static TradeHighligherConfig config;
+
+    public static void initialize(TradeHighligherConfig config, ItemManager itemManager)
+    {
+        TradeHighlighterUtils.config = config;
+        TradeHighlighterUtils.itemManager = itemManager;
+    }
+
+    public static Color lerp(final Color a, final Color b, final float alpha)
+    {
+        return new Color(
+                lerp(a.getRed(),    b.getRed(),     alpha),
+                lerp(a.getGreen(),  b.getGreen(),   alpha),
+                lerp(a.getBlue(),   b.getBlue(),    alpha)
+        );
+    }
+
+    public static int lerp(int a, int b, float alpha)
+    {
+        return (int)((1f - alpha)*(float)a + alpha*(float)b);
+    }
+}

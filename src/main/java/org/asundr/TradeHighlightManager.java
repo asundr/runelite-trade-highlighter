@@ -37,6 +37,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.OverlayManager;
+import org.asundr.ui.SearchItemPanel;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ public class TradeHighlightManager
     {
 
         TradeHighlightManager.config = config;
+        SearchItemPanel.tradeHighlightManager = this;
 
         this.client = client;
         this.clientThread = clientThread;
@@ -134,6 +136,11 @@ public class TradeHighlightManager
             highlighted.clear();
             previousIds.clear();
         }
+    }
+
+    public boolean hasDefinition(int itemId)
+    {
+        return definitions.containsKey(itemId);
     }
 
     public void addDefinition(HighlightDefinition definition)

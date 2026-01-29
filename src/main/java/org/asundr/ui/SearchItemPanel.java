@@ -1,0 +1,84 @@
+/*
+ Copyright (c) 2026, Arun <https://www.github.com/asundr/runelite-trade-highlighter/issues>
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ 1. Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.asundr.ui;
+
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.util.AsyncBufferedImage;
+import org.asundr.HighlightDefinition;
+import org.asundr.TradeHighlightManager;
+import org.asundr.TradeHighlighterUtils;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+
+public class SearchItemPanel extends JButton
+{
+    public static TradeHighlightManager tradeHighlightManager;
+    static TradeHighlighterPluginPanel mainPanel;
+
+    private final int itemId;
+    private final String itemName;
+    SearchItemPanel(int itemId, String itemName)
+    {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        setLayout(new GridLayout());
+        buildPanel();
+        addActionListener(this::onButtonPressed);
+    }
+
+    private void buildPanel()
+    {
+        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.PANEL_WIDTH - 8, 42);
+        setPreferredSize(PREFERRED_SIZE);
+        setMinimumSize(PREFERRED_SIZE);
+        setMaximumSize(PREFERRED_SIZE);
+        setBackground(ColorScheme.DARK_GRAY_COLOR);
+        //setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        final JLabel itemLabel = new JLabel();
+        final AsyncBufferedImage img = TradeHighlighterUtils.getItemManager().getImage(itemId, 1000000, false);
+        img.addTo(itemLabel);
+        //itemLabel.setToolTipText(itemName);
+        itemLabel.setPreferredSize(new Dimension(60, 42));
+
+        final JLabel nameLabel = new JLabel(itemName);
+
+        setToolTipText(itemName);
+
+        add(itemLabel);
+        add(nameLabel);
+    }
+
+    protected void onButtonPressed(ActionEvent e)
+    {
+        HighlightDefinition definition = new HighlightDefinition(itemId, TradeHighlighterUtils.getConfig().defaultColor(), false);
+        definition.setName(itemName);
+        tradeHighlightManager.addDefinition(definition);
+        mainPanel.setTab(TradeHighlighterPluginPanel.PanelTab.DEFINITIONS);
+    }
+}

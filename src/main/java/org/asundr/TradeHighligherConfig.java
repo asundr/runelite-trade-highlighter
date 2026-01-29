@@ -29,13 +29,24 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("trade-highlighter")
+import java.awt.*;
+
+@ConfigGroup(TradeHighligherConfig.CONFIG_GROUP)
 public interface TradeHighligherConfig extends Config
 {
+	String CONFIG_GROUP = "trade-highlighter";
+
 	@ConfigItem(
 		keyName = "enableNotifications",
 		name = "Enable Notifications",
 		description = "If true, items that have been set to notify will do so once offered by the the other player"
 	)
 	default boolean enableNotifications() { return true; }
+
+	@ConfigItem(
+			keyName = "defaultColor",
+			name = "Default color",
+			description = "The default color set when adding a new highlight definition"
+	)
+	default Color defaultColor() { return Color.white; }
 }
