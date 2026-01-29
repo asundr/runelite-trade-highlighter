@@ -27,6 +27,8 @@ package org.asundr;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
+import javax.swing.*;
+
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.client.Notifier;
@@ -36,7 +38,15 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
+import org.asundr.ui.HighlightDefinitionPanel;
+import org.asundr.ui.TradeHighlighterPluginPanel;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 @Slf4j
 @PluginDescriptor(
@@ -53,19 +63,50 @@ public class TradeHighlighterPlugin extends Plugin
 	@Inject private ItemManager itemManager;
 	@Inject private EventBus eventBus;
 	@Inject private Notifier notifier;
+	@Inject private ClientToolbar clientToolbar;
+	@Inject private ColorPickerManager colorPickerManager;
 
 	private TradeHighlightManager tradeHighlightManager;
+	private NavigationButton navigationButton;
+	private TradeHighlighterPluginPanel mainPanel;
+
 
 	@Override
 	protected void startUp() throws Exception
 	{
+		HighlightDefinitionPanel.initialize(client, itemManager, colorPickerManager);
+		TradeHighlighterPluginPanel.initialize(clientThread);
 		tradeHighlightManager = new TradeHighlightManager(client, clientThread, overlayManager, itemManager, eventBus, config, notifier);
+		mainPanel = new TradeHighlighterPluginPanel(tradeHighlightManager);
+		eventBus.register(mainPanel);
+		addNavigationButton(mainPanel);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		tradeHighlightManager.shutdown(overlayManager, eventBus);
+		eventBus.unregister(mainPanel);
+		tradeHighlightManager.shutdown();
+		clientToolbar.removeNavigation(navigationButton);
+	}
+
+	private void addNavigationButton(final TradeHighlighterPluginPanel mainPanel)
+	{
+		navigationButton = NavigationButton.builder()
+				.tooltip("Trade Highlighter")
+				.icon(makeIcon())
+				.priority(5)
+				.panel(mainPanel)
+				.build();
+		clientToolbar.addNavigation(navigationButton);
+	}
+
+	private static BufferedImage makeIcon()
+	{
+		BufferedImage img = new BufferedImage(48,48, BufferedImage.TYPE_INT_RGB);
+		Graphics g = img.getGraphics();
+		g.setColor(Color.blue);
+		return img;
 	}
 
 	@Provides TradeHighligherConfig provideConfig(ConfigManager configManager) { return configManager.getConfig(TradeHighligherConfig.class); }

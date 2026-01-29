@@ -29,7 +29,6 @@ import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.WidgetClosed;
-import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.Notifier;
@@ -47,25 +46,6 @@ import java.util.Objects;
 
 public class TradeHighlightManager
 {
-    static class HighlightDefinition
-    {
-        private int id;
-        private Color color;
-        private boolean notify;
-        private transient String name;
-        transient Panel recordPanel;
-        HighlightDefinition(int id, Color color, boolean notify)
-        {
-            this.id = id;
-            this. color = color;
-            this.notify = notify;
-        }
-        public int getId() { return id; }
-        public boolean shouldNotify() { return notify; }
-        public Color getColor() { return color; }
-        public String getName() { return name; }
-    }
-
     public static final int RECEIVED_CONTAINER = InventoryID.TRADEOFFER | 0x8000;
     public static final int TRADE_MENU = 335;
     public static final int TRADE_OTHER_CHILD_ID = 28;
@@ -75,6 +55,8 @@ public class TradeHighlightManager
     private final ClientThread clientThread;
     private final ItemManager itemManager;
     private final Notifier notifier;
+    private final EventBus eventBus;
+    private final OverlayManager overlayManager;
 
     final TradeHighlightOverlay tradeHighlightOverlay;
     final HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
@@ -85,18 +67,21 @@ public class TradeHighlightManager
 
     TradeHighlightManager(Client client, ClientThread clientThread, OverlayManager overlayManager, ItemManager itemManager, EventBus eventBus, TradeHighligherConfig config, Notifier notifier)
     {
+
         TradeHighlightManager.config = config;
 
         this.client = client;
         this.clientThread = clientThread;
         this.itemManager = itemManager;
         this.notifier = notifier;
+        this.eventBus = eventBus;
+        this.overlayManager = overlayManager;
         tradeHighlightOverlay = new TradeHighlightOverlay(this, itemManager);
         overlayManager.add(tradeHighlightOverlay);
         eventBus.register(this);
     }
 
-    public void shutdown(OverlayManager overlayManager, EventBus eventBus)
+    public void shutdown()
     {
         eventBus.unregister(this);
         overlayManager.remove(tradeHighlightOverlay);
@@ -128,7 +113,7 @@ public class TradeHighlightManager
                     {
                         highlighted.add(child);
                         final HighlightDefinition definition = definitions.get(id);
-                        if (definition.notify && !previousIds.contains(id))
+                        if (definition.getNotify() && !previousIds.contains(id))
                         {
                             notifier.notify(String.format("WARNING: Other player offered %s!", definition.getName()), TrayIcon.MessageType.WARNING);
                         }
@@ -140,6 +125,7 @@ public class TradeHighlightManager
         });
     }
 
+
     @Subscribe
     private void onWidgetClosed(WidgetClosed evt)
     {
@@ -149,5 +135,29 @@ public class TradeHighlightManager
             previousIds.clear();
         }
     }
+
+    public void addDefinition(HighlightDefinition definition)
+    {
+        if (definitions.containsKey(definition.getId()))
+        {
+            return;
+        }
+        clientThread.invoke(() -> {
+            definition.setName(itemManager.getItemComposition(definition.getId()).getMembersName());
+            definitions.put(definition.getId(), definition);
+            eventBus.post(new EventDefinitionAdded(definition));
+        });
+    }
+
+    public void removeDefinition(final int itemId)
+    {
+        if (!definitions.containsKey(itemId))
+        {
+            return;
+        }
+        eventBus.post(new EventDefinitionRemoved(definitions.remove(itemId)));
+    }
+
+
 
 }
