@@ -39,7 +39,7 @@ import java.awt.event.ActionEvent;
 public class SearchItemPanel extends JButton
 {
     private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, 6, 0);
-    private final static int SIZE_VERTICAL = 42;
+    final static int SIZE_VERTICAL = 42;
 
     public static TradeHighlightManager tradeHighlightManager;
     static TradeHighlighterPluginPanel mainPanel;
@@ -59,7 +59,7 @@ public class SearchItemPanel extends JButton
 
     private void buildPanel()
     {
-        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.PANEL_WIDTH - 8, SIZE_VERTICAL);
+        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.SCROLL_PANEL_WIDTH, SIZE_VERTICAL);
         setPreferredSize(PREFERRED_SIZE);
         setMinimumSize(PREFERRED_SIZE);
         setMaximumSize(PREFERRED_SIZE);
@@ -95,7 +95,8 @@ public class SearchItemPanel extends JButton
 
         final JPanel plusWrapper = new JPanel();
         //plusWrapper.setLayout(new BoxLayout(plusWrapper, BoxLayout.X_AXIS));
-        final JLabel plusLabel = new JLabel("+");
+        final JLabel plusLabel = new JLabel("<html><b>+</b></html>");
+        plusLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
         plusWrapper.add(plusLabel);
         plusWrapper.setBackground(new Color(0, 80, 0));
         plusWrapper.setPreferredSize(new Dimension(20, SIZE_VERTICAL));
@@ -115,4 +116,5 @@ public class SearchItemPanel extends JButton
     }
 
     public String getItemName() { return itemName; }
+
 }
