@@ -28,6 +28,7 @@ package org.asundr;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 
 import java.awt.*;
 
@@ -36,24 +37,45 @@ public interface TradeHighligherConfig extends Config
 {
 	String CONFIG_GROUP = "trade-highlighter";
 
+	@ConfigSection(
+			name = "General",
+			description = "General settings",
+			position = -10
+	)
+	String SECTION_GENERAL = "general";
+
+	@ConfigSection(
+			name = "Defaults",
+			description = "Default values for newly added definitions",
+			position = -9
+	)
+	String SECTION_DEFAULTS = "defaults";
+
+	/////
+
+
+
 	@ConfigItem(
 		keyName = "enableNotifications",
 		name = "Enable Notifications",
-		description = "If true, items that have been set to notify will do so once offered by the the other player"
+		description = "If true, items that have been set to notify will do so once offered by the the other player",
+		section = SECTION_GENERAL
 	)
 	default boolean enableNotifications() { return true; }
 
 	@ConfigItem(
 			keyName = "defaultColor",
 			name = "Default color",
-			description = "The default color set when adding a new highlight definition"
+			description = "The default color set when adding a new highlight definition",
+			section = SECTION_DEFAULTS
 	)
 	default Color defaultColor() { return Color.white; }
 
 	@ConfigItem(
 			keyName = "defaultNotify",
 			name = "Default notify",
-			description = "If enabled, any new definition with be set to notify by default"
+			description = "If enabled, any new definition with be set to notify by default",
+			section = SECTION_DEFAULTS
 	)
 	default boolean defaultNotify() { return false; }
 }

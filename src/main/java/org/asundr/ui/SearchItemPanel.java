@@ -81,7 +81,7 @@ public class SearchItemPanel extends JButton
 
     protected void onButtonPressed(ActionEvent e)
     {
-        HighlightDefinition definition = new HighlightDefinition(itemId, TradeHighlighterUtils.getConfig().defaultColor(), false);
+        HighlightDefinition definition = new HighlightDefinition(itemId, TradeHighlighterUtils.getConfig().defaultColor(), TradeHighlighterUtils.getConfig().defaultNotify());
         definition.setName(itemName);
         tradeHighlightManager.addDefinition(definition);
         mainPanel.setTab(TradeHighlighterPluginPanel.PanelTab.DEFINITIONS);
