@@ -38,8 +38,8 @@ import java.awt.event.ActionEvent;
 
 public class SearchItemPanel extends JButton
 {
-    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 5, 6, 5);
-
+    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, 6, 0);
+    private final static int SIZE_VERTICAL = 42;
 
     public static TradeHighlightManager tradeHighlightManager;
     static TradeHighlighterPluginPanel mainPanel;
@@ -50,33 +50,59 @@ public class SearchItemPanel extends JButton
     {
         this.itemId = itemId;
         this.itemName = itemName;
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BorderLayout());
         buildPanel();
         addActionListener(this::onButtonPressed);
-        //setBorder(BORDER_EMPTY);
+        setBorder(BORDER_EMPTY);
+        setBackground(ColorScheme.DARK_GRAY_COLOR);
     }
 
     private void buildPanel()
     {
-        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.PANEL_WIDTH - 8, 42);
+        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.PANEL_WIDTH - 8, SIZE_VERTICAL);
         setPreferredSize(PREFERRED_SIZE);
         setMinimumSize(PREFERRED_SIZE);
         setMaximumSize(PREFERRED_SIZE);
-        setBackground(ColorScheme.DARKER_GRAY_COLOR);
+//        setBackground(ColorScheme.DARKER_GRAY_COLOR);
         //setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
+        final JPanel itemWrapper = new JPanel();
+        //itemWrapper.setLayout(new BoxLayout(itemWrapper, BoxLayout.X_AXIS));
         final JLabel itemLabel = new JLabel();
         final AsyncBufferedImage img = TradeHighlighterUtils.getItemManager().getImage(itemId, 1000000, false);
         img.addTo(itemLabel);
         //itemLabel.setToolTipText(itemName);
-        itemLabel.setPreferredSize(new Dimension(60, 42));
+        itemWrapper.setPreferredSize(new Dimension(SIZE_VERTICAL + 12, SIZE_VERTICAL));
+        itemWrapper.setMaximumSize(new Dimension(SIZE_VERTICAL + 12, SIZE_VERTICAL));
+        itemWrapper.setMinimumSize(new Dimension(SIZE_VERTICAL + 12, SIZE_VERTICAL));
+        itemWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        itemWrapper.add(itemLabel);
 
+        final JPanel nameWrapper = new JPanel();
+        nameWrapper.setLayout(new BoxLayout(nameWrapper, BoxLayout.X_AXIS));
         final JLabel nameLabel = new JLabel(itemName);
+        nameLabel.setPreferredSize(new Dimension(160, SIZE_VERTICAL));
+        nameLabel.setMaximumSize(new Dimension(160, SIZE_VERTICAL));
+        nameLabel.setMinimumSize(new Dimension(160, SIZE_VERTICAL));
+
+        nameWrapper.add(nameLabel);
+        nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameWrapper.setPreferredSize(new Dimension(160, SIZE_VERTICAL));
+        nameWrapper.setMaximumSize(new Dimension(160, SIZE_VERTICAL));
+        nameWrapper.setMinimumSize(new Dimension(160, SIZE_VERTICAL));
 
         setToolTipText("Add definition for " + itemName);
 
-        add(itemLabel);
-        add(nameLabel);
+        final JPanel plusWrapper = new JPanel();
+        //plusWrapper.setLayout(new BoxLayout(plusWrapper, BoxLayout.X_AXIS));
+        final JLabel plusLabel = new JLabel("+");
+        plusWrapper.add(plusLabel);
+        plusWrapper.setBackground(new Color(0, 80, 0));
+        plusWrapper.setPreferredSize(new Dimension(20, SIZE_VERTICAL));
+
+        add(itemWrapper, BorderLayout.WEST);
+        add(nameWrapper, BorderLayout.CENTER);
+        add(plusWrapper, BorderLayout.EAST);
     }
 
     protected void onButtonPressed(ActionEvent e)
