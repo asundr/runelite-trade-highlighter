@@ -32,11 +32,15 @@ import org.asundr.TradeHighlightManager;
 import org.asundr.TradeHighlighterUtils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class SearchItemPanel extends JButton
 {
+    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 5, 6, 5);
+
+
     public static TradeHighlightManager tradeHighlightManager;
     static TradeHighlighterPluginPanel mainPanel;
 
@@ -46,9 +50,10 @@ public class SearchItemPanel extends JButton
     {
         this.itemId = itemId;
         this.itemName = itemName;
-        setLayout(new GridLayout());
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         buildPanel();
         addActionListener(this::onButtonPressed);
+        //setBorder(BORDER_EMPTY);
     }
 
     private void buildPanel()
@@ -57,7 +62,7 @@ public class SearchItemPanel extends JButton
         setPreferredSize(PREFERRED_SIZE);
         setMinimumSize(PREFERRED_SIZE);
         setMaximumSize(PREFERRED_SIZE);
-        setBackground(ColorScheme.DARK_GRAY_COLOR);
+        setBackground(ColorScheme.DARKER_GRAY_COLOR);
         //setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
         final JLabel itemLabel = new JLabel();
@@ -68,7 +73,7 @@ public class SearchItemPanel extends JButton
 
         final JLabel nameLabel = new JLabel(itemName);
 
-        setToolTipText(itemName);
+        setToolTipText("Add definition for " + itemName);
 
         add(itemLabel);
         add(nameLabel);
@@ -80,5 +85,8 @@ public class SearchItemPanel extends JButton
         definition.setName(itemName);
         tradeHighlightManager.addDefinition(definition);
         mainPanel.setTab(TradeHighlighterPluginPanel.PanelTab.DEFINITIONS);
+        setVisible(false);
     }
+
+    public String getItemName() { return itemName; }
 }

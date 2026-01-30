@@ -33,7 +33,6 @@ public class HighlightDefinition
     private Color color;
     private boolean notify;
     private transient String name;
-    transient Panel recordPanel;
     public HighlightDefinition(int id, Color color, boolean notify)
     {
         this.id = id;

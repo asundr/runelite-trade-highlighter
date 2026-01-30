@@ -85,7 +85,6 @@ public class TradeHighlighterPlugin extends Plugin
 		mainPanel = new TradeHighlighterPluginPanel(tradeHighlightManager);
 		eventBus.register(mainPanel);
 		addNavigationButton(mainPanel);
-
 		TradeHighlighterUtils.loadDefinitions();
 	}
 
@@ -113,6 +112,7 @@ public class TradeHighlighterPlugin extends Plugin
 		BufferedImage img = new BufferedImage(48,48, BufferedImage.TYPE_INT_RGB);
 		Graphics g = img.getGraphics();
 		g.setColor(Color.blue);
+		g.fillRect(0, 0, 48, 48);
 		return img;
 	}
 

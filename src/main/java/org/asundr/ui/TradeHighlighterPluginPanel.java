@@ -29,18 +29,24 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ItemComposition;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.IconTextField;
+import net.runelite.client.ui.components.materialtabs.MaterialTab;
+import net.runelite.client.ui.components.materialtabs.MaterialTabGroup;
 import net.runelite.http.api.item.ItemPrice;
 import org.asundr.*;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class TradeHighlighterPluginPanel extends PluginPanel
@@ -51,13 +57,21 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         ADD_NEW
     }
     public static int PANEL_WIDTH;
+    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, 0, 0);
+
 
     static ClientThread clientThread;
 
     private final TradeHighlightManager tradeHighlightManager;
 
+    private static final ExecutorService searchExecutor = Executors.newFixedThreadPool(1);
 
+    private final JPanel display = new JPanel();
     private PanelTab currentTab = PanelTab.DEFINITIONS;
+    private final MaterialTabGroup tabGroup = new MaterialTabGroup(display);
+    private MaterialTab definitionsTab;
+    private MaterialTab searchTab;
+
     private final JPanel definitionsMainPanel = new JPanel();
     private final JPanel definitionListPanel = new JPanel();
     private final JPanel searchMainPanel = new JPanel();
@@ -75,11 +89,16 @@ public class TradeHighlighterPluginPanel extends PluginPanel
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        buildHeader();
+
+        display.setPreferredSize(new Dimension(PANEL_WIDTH, 2000));
+        add(display);
+
         buildDefinitionsPanel();
         buildSearchPanel();
 
-        definitionsMainPanel.setVisible(true);
-        searchMainPanel.setVisible(false);
+        tabGroup.select(definitionsTab);
+        revalidate();
     }
 
     public static void initialize(ClientThread clientThread)
@@ -87,11 +106,34 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         TradeHighlighterPluginPanel.clientThread = clientThread;
     }
 
+    private void buildHeader()
+    {
+//        final JPanel titleWrapper = new JPanel();
+//        final JLabel titleLabel = new JLabel("<html><span style='font-size:16;color:yellow'><b><nobr>Trade Highlighter</nobr></b></span><html><br>");
+//        titleLabel.setBorder(BORDER_EMPTY);
+//        titleWrapper.add(titleLabel);
+//        titleWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+//        titleLabel.setToolTipText("Created by asundr");
+//        //titleWrapper.setBorder(BORDER_EMPTY);
+//        titleWrapper.setPreferredSize(new Dimension(PANEL_WIDTH, 20));
+//        //headerPanel.add(titleWrapper, CENTER_ALIGNMENT);
+
+        final JPanel tabWrapper = new JPanel();
+        definitionsTab = new MaterialTab("Definitions", tabGroup, definitionsMainPanel);
+        searchTab = new MaterialTab("Add", tabGroup, searchMainPanel);
+        tabGroup.addTab(definitionsTab);
+        tabGroup.addTab(searchTab);
+        tabWrapper.add(tabGroup);
+
+//        add(titleWrapper);
+        add(tabWrapper);
+    }
+
     private void buildDefinitionsPanel()
     {
         definitionsMainPanel.setLayout(new BorderLayout());
 
-        final JPanel toolbar = buildDefinitionsToolbar();
+        //final JPanel toolbar = buildDefinitionsToolbar();
 
         definitionListPanel.setLayout(new BoxLayout(definitionListPanel, BoxLayout.Y_AXIS));
         //set border?
@@ -104,10 +146,10 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         customScrollBar.setPreferredSize(preferredSize);
         definitionHistoryScroll.setVerticalScrollBar(customScrollBar);
 
-        definitionsMainPanel.add(toolbar, BorderLayout.NORTH);
+        //definitionsMainPanel.add(toolbar, BorderLayout.NORTH);
         definitionsMainPanel.add(definitionHistoryScroll, BorderLayout.CENTER);
 
-        add(definitionsMainPanel);
+        //add(definitionsMainPanel);
     }
 
     private void buildSearchPanel()
@@ -125,7 +167,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         searchMainPanel.add(searchListScroll, BorderLayout.CENTER);
 
 
-        add(searchMainPanel);
+        //add(searchMainPanel);
     }
 
 
@@ -140,21 +182,26 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         JButton addDefinitionButton = new JButton("+");
         addDefinitionButton.addActionListener(e -> setTab(PanelTab.ADD_NEW));
         toolbar.add(addDefinitionButton);
+        //toolbar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         return toolbar;
     }
 
     private JPanel buildSearchToolbar()
     {
         final JPanel toolbar = new JPanel();
-        JButton backToDefinitionsButton = new JButton("◁");
-        backToDefinitionsButton.addActionListener(e -> setTab(PanelTab.DEFINITIONS));
+
+//        JButton backToDefinitionsButton = new JButton("◁");
+//        backToDefinitionsButton.addActionListener(e -> setTab(PanelTab.DEFINITIONS));
+//        toolbar.add(backToDefinitionsButton);
 
         itemSearchBar.setIcon(IconTextField.Icon.SEARCH);
 //        searchBar.addActionListener(e -> executor.execute(() -> priceLookup(false)));
-        itemSearchBar.addActionListener(e -> updateSearchList());
-
-        toolbar.add(backToDefinitionsButton);
+        itemSearchBar.addActionListener(e -> searchExecutor.execute(this::updateSearchList));
+        itemSearchBar.setPreferredSize(new Dimension(PANEL_WIDTH - 16, 32));
+        itemSearchBar.addClearListener(this::updateSearchList);
+        itemSearchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         toolbar.add(itemSearchBar);
+        //toolbar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         //toolbar.
         return toolbar;
     }
@@ -179,38 +226,39 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         }
         //clientThread.invokeLater(() -> processResult(result, searchQuery, exactMatch));
         clientThread.invoke(() ->{
-        for (final ItemPrice item : result)
-        {
-            int id = item.getId();
-            final ItemComposition comp = TradeHighlighterUtils.getItemManager().getItemComposition(id);
-            if (!comp.isTradeable())
+            for (final ItemPrice item : result)
             {
-                continue;
+                int id = item.getId();
+                final ItemComposition comp = TradeHighlighterUtils.getItemManager().getItemComposition(id);
+                if (!comp.isTradeable())
+                {
+                    continue;
+                }
+                if (comp.getNote() != -1)
+                {
+                    id = comp.getLinkedNoteId();
+                }
+                if (tradeHighlightManager.hasDefinition(id))
+                {
+                    continue;
+                }
+                final String name = comp.getMembersName();
+                searchListPanel.add(new SearchItemPanel(id, name));
             }
-            if (comp.getNote() != -1)
-            {
-                id = comp.getLinkedNoteId();
-            }
-            if (tradeHighlightManager.hasDefinition(id))
-            {
-                continue;
-            }
-            final String name = comp.getMembersName();
-            searchListPanel.add(new SearchItemPanel(id, name));
-        }
+            SwingUtilities.invokeLater(searchListPanel::updateUI);
         });
-        SwingUtilities.invokeLater(searchListPanel::updateUI);
     }
 
     private void addDefinitionPanel(HighlightDefinition definition)
     {
         //client thread? invoked later?
         final HighlightDefinitionPanel highlightDefinitionPanel = new HighlightDefinitionPanel(definition, tradeHighlightManager);
+        final int index = getInsertIndex(definition.getName());
         // Create padding?
         // toggle visible if filter active
 
         SwingUtilities.invokeLater(()->{
-                definitionListPanel.add(highlightDefinitionPanel);
+                definitionListPanel.add(highlightDefinitionPanel, index);
                 definitionListPanel.updateUI();
         });
 
@@ -227,9 +275,11 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                 HighlightDefinitionPanel panel = (HighlightDefinitionPanel) component;
                 if (panel.getDefinition() == definition)
                 {
+                    Arrays.stream(searchListPanel.getComponents()).filter(e -> ((SearchItemPanel)e).getItemName().equalsIgnoreCase(definition.getName())).findFirst().ifPresent(c -> c.setVisible(true));
                     SwingUtilities.invokeLater(() -> {
                         definitionListPanel.remove(component);
                         definitionListPanel.updateUI();
+                        searchListPanel.updateUI();
                     });
                     return;
                 }
@@ -239,8 +289,10 @@ public class TradeHighlighterPluginPanel extends PluginPanel
 
     private void refreshDefinitionPanel(final HashMap<Integer, HighlightDefinition> definitions)
     {
+        final Comparator<HighlightDefinition> comparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+        final List<HighlightDefinition> sortedDefinitions = definitions.values().stream().sorted(comparator).collect(Collectors.toList());
         SwingUtilities.invokeLater(()->{
-            for (HighlightDefinition definition : definitions.values())
+            for (HighlightDefinition definition : sortedDefinitions)
             {
                 final HighlightDefinitionPanel highlightDefinitionPanel = new HighlightDefinitionPanel(definition, tradeHighlightManager);
                 definitionListPanel.add(highlightDefinitionPanel);
@@ -249,25 +301,68 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         });
     }
 
+    // TODO update with tab api
     public void setTab(PanelTab tab)
     {
-        if (tab == currentTab)
-        {
-            return;
-        }
-        definitionsMainPanel.setVisible(false);
-        searchMainPanel.setVisible(false);
+        MaterialTab tabWidget;
         switch (tab)
         {
             case DEFINITIONS:
-                itemSearchBar.setText("");
-                definitionsMainPanel.setVisible(true); break;
+                tabWidget = definitionsTab; break;
             case ADD_NEW:
-                searchMainPanel.setVisible(true); break;
+                tabWidget = searchTab;
+                if (itemSearchBar.getText().isBlank())
+                {
+                    itemSearchBar.requestFocusInWindow();
+                }
+                break;
             default:
-                log.warn("Unhandled tab in TradeHighlightPluginPanel::setTab()");
+                return;
         }
-        currentTab = tab;
-        SwingUtilities.invokeLater(this::updateUI);
+        if (tabWidget.isSelected())
+        {
+            return;
+        }
+        tabGroup.select(tabWidget);
+
+        if (true) return;
+
+//        if (tab == currentTab)
+//        {
+//            return;
+//        }
+//        definitionsMainPanel.setVisible(false);
+//        searchMainPanel.setVisible(false);
+//        switch (tab)
+//        {
+//            case DEFINITIONS:
+//                itemSearchBar.setText("");
+//                definitionsMainPanel.setVisible(true); break;
+//            case ADD_NEW:
+//                searchMainPanel.setVisible(true); break;
+//            default:
+//                log.warn("Unhandled tab in TradeHighlightPluginPanel::setTab()");
+//        }
+//        currentTab = tab;
+//        SwingUtilities.invokeLater(this::updateUI);
+    }
+
+    private int getInsertIndex(String name)
+    {
+        name = name.toLowerCase();
+        int index = 0;
+        for (Component component : definitionListPanel.getComponents())
+        {
+            if (component instanceof HighlightDefinitionPanel)
+            {
+                HighlightDefinitionPanel panel = (HighlightDefinitionPanel) component;
+                if (name.compareTo(panel.getDefinition().getName().toLowerCase()) < 0)
+                {
+                    return index;
+                }
+            }
+            ++index;
+        }
+        return index;
     }
 }

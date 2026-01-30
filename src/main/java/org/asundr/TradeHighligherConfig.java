@@ -49,4 +49,11 @@ public interface TradeHighligherConfig extends Config
 			description = "The default color set when adding a new highlight definition"
 	)
 	default Color defaultColor() { return Color.white; }
+
+	@ConfigItem(
+			keyName = "defaultNotify",
+			name = "Default notify",
+			description = "If enabled, any new definition with be set to notify by default"
+	)
+	default boolean defaultNotify() { return false; }
 }
