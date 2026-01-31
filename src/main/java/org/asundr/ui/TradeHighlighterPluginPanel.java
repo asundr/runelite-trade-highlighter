@@ -277,10 +277,23 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                     break;
                 };
             }
-            final ArrayList<SearchItemPanel> nonGeItems = TradeHighlighterUtils.searchNonGeItems(searchQuery, MAX_SEARCH_COUNT - addedCount);
-            nonGeItems.forEach(searchListPanel::add);
-            searchListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, (addedCount+nonGeItems.size())*SearchItemPanel.SIZE_VERTICAL));
-            updateSearchPanelFooter(result.size() - (addedCount + alreadyDefinedCount));
+            final ArrayList<SearchItemPanel> nonGeItems = TradeHighlighterUtils.matchNonGeItems(searchQuery);
+            for (final SearchItemPanel itemPanel : nonGeItems)
+            {
+                if (addedCount >= MAX_SEARCH_COUNT)
+                {
+                    break;
+                }
+                if (tradeHighlightManager.hasDefinition(itemPanel.getItemId()))
+                {
+                    ++alreadyDefinedCount;
+                    continue;
+                }
+                searchListPanel.add(itemPanel);
+                ++addedCount;
+            }
+            searchListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, addedCount * SearchItemPanel.SIZE_VERTICAL));
+            updateSearchPanelFooter((result.size() + nonGeItems.size()) - (addedCount + alreadyDefinedCount));
             SwingUtilities.invokeLater(searchListPanel::updateUI);
         });
     }

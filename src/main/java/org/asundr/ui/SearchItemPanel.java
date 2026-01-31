@@ -117,5 +117,6 @@ public class SearchItemPanel extends JButton
     }
 
     public String getItemName() { return itemName; }
+    public int getItemId() { return itemId; }
 
 }

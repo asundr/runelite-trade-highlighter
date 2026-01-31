@@ -51,6 +51,13 @@ public interface TradeHighligherConfig extends Config
 	)
 	String SECTION_DEFAULTS = "defaults";
 
+	@ConfigSection(
+			name = "Advanced",
+			description = "Options for advanced users",
+			position = 100
+	)
+	String SECTION_ADVANCED = "advanced";
+
 	/////
 
 
@@ -78,4 +85,14 @@ public interface TradeHighligherConfig extends Config
 			section = SECTION_DEFAULTS
 	)
 	default boolean defaultNotify() { return false; }
+
+	@ConfigItem(
+			keyName = "nonGeIds",
+			name = "Custom item IDs",
+			description = "Comma-separated list of item IDs that will allow those items to be added for highlighting." +
+					"<br>Useful for new tradeable items that cannot be put in the GE that are not yet handled by the plugin." +
+					"<br>Make an issue on the plugin's github page if this item should be handled by default.",
+			section = SECTION_ADVANCED
+	)
+	default String getNonGeIds() { return ""; }
 }
