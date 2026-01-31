@@ -145,23 +145,28 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     {
         definitionsMainPanel.setLayout(new BorderLayout());
 
-        //final JPanel toolbar = buildDefinitionsToolbar();
-
         definitionListPanel.setLayout(new BoxLayout(definitionListPanel, BoxLayout.Y_AXIS));
-        //set border?
         JScrollPane definitionHistoryScroll = new JScrollPane(definitionListPanel);
         definitionHistoryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        definitionHistoryScroll.setPreferredSize(new Dimension(PANEL_WIDTH, 2000));
+        definitionHistoryScroll.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, 2000));
+        definitionListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, 1));
+        definitionListPanel.setBorder(BorderFactory.createEmptyBorder(0, PANEL_PADDING_X, 0, 0));
+//        definitionListPanel.setBackground(Color.BLUE);
+
         // Custom scrollbar
-        JScrollBar customScrollBar = new JScrollBar(JScrollBar.VERTICAL);
-        Dimension preferredSize = new Dimension(6, Integer.MAX_VALUE);
-        customScrollBar.setPreferredSize(preferredSize);
-        definitionHistoryScroll.setVerticalScrollBar(customScrollBar);
+//        JScrollBar customScrollBar = new JScrollBar(JScrollBar.VERTICAL);
+//        Dimension preferredSize = new Dimension(6, Integer.MAX_VALUE);
+//        customScrollBar.setPreferredSize(preferredSize);
+//        definitionHistoryScroll.setVerticalScrollBar(customScrollBar);
 
-        //definitionsMainPanel.add(toolbar, BorderLayout.NORTH);
+        updateDefinitionPanelSize();
+
         definitionsMainPanel.add(definitionHistoryScroll, BorderLayout.CENTER);
+    }
 
-        //add(definitionsMainPanel);
+    private void updateDefinitionPanelSize()
+    {
+        definitionListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, definitionListPanel.getComponentCount() * HighlightDefinitionPanel.getSizeVertical()));
     }
 
     private void buildSearchPanel()
@@ -170,13 +175,12 @@ public class TradeHighlighterPluginPanel extends PluginPanel
 
         JPanel toolbar = buildSearchToolbar();
 
-
         searchListPanel.setLayout(new BoxLayout(searchListPanel, BoxLayout.Y_AXIS));
         JScrollPane searchListScroll = new JScrollPane(searchListPanel);
         searchListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         searchListScroll.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, 2000));
-        searchListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, 2000));
-        searchListPanel.setBorder(BorderFactory.createEmptyBorder(0, PANEL_PADDING_X, 100, 0));
+        searchListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, 1));
+        searchListPanel.setBorder(BorderFactory.createEmptyBorder(0, PANEL_PADDING_X, 0, 0));
 
         final Dimension footerDimension = new Dimension(PANEL_WIDTH, 35);
         searchFooterPanel.setPreferredSize(footerDimension);
@@ -281,18 +285,15 @@ public class TradeHighlighterPluginPanel extends PluginPanel
 
     private void addDefinitionPanel(HighlightDefinition definition)
     {
-        //client thread? invoked later?
         final HighlightDefinitionPanel highlightDefinitionPanel = new HighlightDefinitionPanel(definition, tradeHighlightManager);
         final int index = getInsertIndex(definition.getName());
-        // Create padding?
         // toggle visible if filter active
 
         SwingUtilities.invokeLater(()->{
-                definitionListPanel.add(highlightDefinitionPanel, index);
-                definitionListPanel.updateUI();
+            definitionListPanel.add(highlightDefinitionPanel, index);
+            updateDefinitionPanelSize();
+            definitionListPanel.updateUI();
         });
-
-        //definitionListPanel.add(highlightDefinitionPanel.paddingStruct);
         // update empty definitions message
     }
 
@@ -308,6 +309,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                     Arrays.stream(searchListPanel.getComponents()).filter(e -> ((SearchItemPanel)e).getItemName().equalsIgnoreCase(definition.getName())).findFirst().ifPresent(c -> c.setVisible(true));
                     SwingUtilities.invokeLater(() -> {
                         definitionListPanel.remove(component);
+                        updateDefinitionPanelSize();
                         definitionListPanel.updateUI();
                         searchListPanel.updateUI();
                     });
@@ -327,6 +329,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                 final HighlightDefinitionPanel highlightDefinitionPanel = new HighlightDefinitionPanel(definition, tradeHighlightManager);
                 definitionListPanel.add(highlightDefinitionPanel);
             }
+            updateDefinitionPanelSize();
             SwingUtilities.invokeLater(definitionListPanel::updateUI);
         });
     }

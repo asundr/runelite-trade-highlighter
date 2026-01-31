@@ -30,8 +30,11 @@ import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.util.ImageUtil;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -95,5 +98,32 @@ public class TradeHighlighterUtils
             definitions.put(definition.getId(), definition);
         }
         TradeHighlighterPlugin.tradeHighlightManager.refreshDefinition(definitions);
+    }
+
+    public static ImageIcon getIconFromName(final String filename, int width, int height, final int hints)
+    {
+        BufferedImage iconImg = getImageFromName(filename);
+        if (iconImg == null)
+        {
+            return null;
+        }
+        if (width == -1 && height == -1)
+        {
+            return new ImageIcon(iconImg);
+        }
+        if (width == -1)
+        {
+            width = height;
+        }
+        if (height == -1)
+        {
+            height = width;
+        }
+        return new ImageIcon(iconImg.getScaledInstance(width, height, hints));
+    }
+
+    public static BufferedImage getImageFromName(final String filename)
+    {
+        return ImageUtil.loadImageResource(TradeHighlighterPlugin.class, "/" + filename);
     }
 }

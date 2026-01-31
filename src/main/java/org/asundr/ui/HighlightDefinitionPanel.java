@@ -43,18 +43,24 @@ import java.awt.event.ActionListener;
 
 public class HighlightDefinitionPanel extends JPanel
 {
+    private static final int SIZE_VERTICAL = 40;
+    private static final int SPACING_VERTICAL = 6;
+    private static final int SIZE_VERTICAL_FULL = SIZE_VERTICAL + SPACING_VERTICAL;
+    private static final int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SCROLL_PANEL_WIDTH;
 
-    private static final int SIZE_ITEM_ICON = 48;
-    private static final Dimension PREFERRED_SIZE = new Dimension(SIZE_ITEM_ICON, SIZE_ITEM_ICON);
+    private static final int SIZE_ITEM_ICON = SIZE_VERTICAL;
+    private static final Dimension DIMENSION_ITEM_ICON = new Dimension(SIZE_ITEM_ICON - 2, SIZE_VERTICAL);
 
-    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 5, 6, 5);
+    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, SPACING_VERTICAL, 0);
     private final static Border BORDER_NOTIFY = BorderFactory.createLineBorder(ColorScheme.MEDIUM_GRAY_COLOR);
 
 
-    private static final int SIZE_COLOR_SELECTOR = SIZE_ITEM_ICON - 24;
+    private static final int SIZE_COLOR_SELECTOR = SIZE_ITEM_ICON - 16;
     private static final Dimension COLOR_SELECTOR_SIZE = new Dimension(SIZE_COLOR_SELECTOR, SIZE_COLOR_SELECTOR);
     private static final Color COLOR_BASE = new Color(30,30,30);
     private static final float BACKGROUND_COLOR_ALPHA = 0.02f;
+
+    //private static final ImageIcon ICON_NOTIFY = TradeHighlighterUtils.getIconFromName("notify.png", 20, 20, Image.SCALE_SMOOTH);
 
     private static Client client;
     private static ItemManager itemManager;
@@ -64,11 +70,13 @@ public class HighlightDefinitionPanel extends JPanel
 
     private final JPanel itemWrapper = new JPanel();
 
+    public static int getSizeVertical() { return SIZE_VERTICAL_FULL; }
 
     public HighlightDefinitionPanel(HighlightDefinition definition, TradeHighlightManager tradeHighlightManager)
     {
         this.definition = definition;
         buildPanel(tradeHighlightManager);
+        setBorder(BORDER_EMPTY);
     }
 
     public static void initialize(Client client, ItemManager itemManager, ColorPickerManager colorPickerManager)
@@ -83,22 +91,16 @@ public class HighlightDefinitionPanel extends JPanel
     private void buildPanel(TradeHighlightManager tradeHighlightManager)
     {
         setLayout(new BorderLayout());
-        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.PANEL_WIDTH - 8, SIZE_ITEM_ICON);
+        final Dimension PREFERRED_SIZE = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
         setPreferredSize(PREFERRED_SIZE);
         setMinimumSize(PREFERRED_SIZE);
         setMaximumSize(PREFERRED_SIZE);
-//        setBackground(Color.DARK_GRAY);
-        Color lerped = TradeHighlighterUtils.lerp(COLOR_BASE, definition.getColor(), BACKGROUND_COLOR_ALPHA);
-//        setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, definition.getColor(), BACKGROUND_COLOR_ALPHA));
-        //setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        setBorder(BORDER_EMPTY);
 
         // add item label, item name tooltip
         buildItemLabel();
 
-        JPanel contents = new JPanel();
-        //contents.setLayout(new GridLayout());
-        contents.setPreferredSize(new Dimension(TradeHighlighterPluginPanel.PANEL_WIDTH, SIZE_ITEM_ICON/2));
+        final JPanel contents = new JPanel();
+        contents.setPreferredSize(new Dimension(SIZE_HORIZONTAL, SIZE_ITEM_ICON/2));
         contents.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         add(contents, BorderLayout.CENTER);
         buildItemName(contents);
@@ -106,27 +108,19 @@ public class HighlightDefinitionPanel extends JPanel
         buildNotifyCheckbox(contents);
 
         buildDeleteButton(tradeHighlightManager);
-        // add color select or
-        // add notification checkbox
-        // X icon to delete
-
-
         setToolTipText(definition.getName());
     }
 
     private void buildItemLabel()
     {
-        JLabel itemLabel = new JLabel();
+        final JLabel itemLabel = new JLabel();
         final AsyncBufferedImage img = getItemImage(definition.getId());
         img.addTo(itemLabel);
-        itemLabel.setToolTipText(definition.getName());
-//        itemLabel.setPreferredSize(PREFERRED_SIZE);
-//        itemLabel.setMinimumSize(PREFERRED_SIZE);
-        itemLabel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         itemWrapper.add(itemLabel);
+        itemWrapper.setPreferredSize(DIMENSION_ITEM_ICON);
+        itemWrapper.setMaximumSize(DIMENSION_ITEM_ICON);
+        itemWrapper.setMinimumSize(DIMENSION_ITEM_ICON);
         itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, definition.getColor(), BACKGROUND_COLOR_ALPHA));
-        itemWrapper.setPreferredSize(PREFERRED_SIZE);
-        itemWrapper.setMinimumSize(PREFERRED_SIZE);
         add(itemWrapper, BorderLayout.WEST);
     }
 
@@ -136,16 +130,21 @@ public class HighlightDefinitionPanel extends JPanel
         final JLabel nameLabel = new JLabel(definition.getName());
         nameWrapper.add(nameLabel);
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        Dimension PREFERRED_DIMENSION_TEXT = new Dimension(80, SIZE_ITEM_ICON/2);
+        final Dimension PREFERRED_DIMENSION_TEXT = new Dimension(85, SIZE_VERTICAL);
         nameLabel.setPreferredSize(PREFERRED_DIMENSION_TEXT);
         nameLabel.setMaximumSize(PREFERRED_DIMENSION_TEXT);
+        nameLabel.setMinimumSize(PREFERRED_DIMENSION_TEXT);
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
+
         nameWrapper.setPreferredSize(PREFERRED_DIMENSION_TEXT);
         nameWrapper.setMaximumSize(PREFERRED_DIMENSION_TEXT);
+        nameWrapper.setMinimumSize(PREFERRED_DIMENSION_TEXT);
         parent.add(nameWrapper);
     }
 
     private void buildColorSelector(JPanel parent)
     {
+        final JPanel colorButtonWrapper = new JPanel();
         JButton colorButton = new JButton();
         colorButton.setBackground(definition.getColor());
         colorButton.addActionListener(new ActionListener(){
@@ -166,11 +165,17 @@ public class HighlightDefinitionPanel extends JPanel
 
             }
         });
+        final Dimension wrapperDimension = new Dimension(25, SIZE_VERTICAL);
+        colorButtonWrapper.setPreferredSize(wrapperDimension);
+        colorButtonWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
         colorButton.setToolTipText("Select the highlight color");
         colorButton.setPreferredSize(COLOR_SELECTOR_SIZE);
         colorButton.setMinimumSize(COLOR_SELECTOR_SIZE);
         colorButton.setMaximumSize(COLOR_SELECTOR_SIZE);
-        parent.add(colorButton);
+
+        colorButtonWrapper.add(colorButton);
+        parent.add(colorButtonWrapper);
     }
 
     private void buildNotifyCheckbox(JPanel parent)
@@ -181,18 +186,30 @@ public class HighlightDefinitionPanel extends JPanel
             definition.setNotify(checkbox.isSelected());
             TradeHighlighterUtils.saveDefinitions();
         });
+
+        final JPanel checkboxWrapper = new JPanel();
+        final Dimension wrapperDimension = new Dimension(25, SIZE_VERTICAL);
+        checkboxWrapper.setPreferredSize(wrapperDimension);
+        checkboxWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
         checkbox.setToolTipText("Enable to send notification when this item is offered by the other player");
         checkbox.setBorder(BORDER_NOTIFY);
-        checkbox.setBorderPainted(true);
-        parent.add(checkbox);
+
+        checkbox.setBackground(Color.black);
+        checkbox.setOpaque(true);
+
+        checkboxWrapper.add(checkbox);
+        parent.add(checkboxWrapper);
     }
 
     private void buildDeleteButton(TradeHighlightManager tradeHighlightManager)
     {
-        JButton deleteButton = new JButton("X");
+        JButton deleteButton = new JButton("×");
+        deleteButton.setPreferredSize(new Dimension(20, SIZE_VERTICAL_FULL));
         deleteButton.addActionListener(e -> tradeHighlightManager.removeDefinition(definition.getId()));
-        deleteButton.setToolTipText("Delete rule for " + definition.getName());
+        deleteButton.setToolTipText("Delete definition for " + definition.getName());
         deleteButton.setBackground(new Color(70, 0 ,0));
+        deleteButton.setBorderPainted(false);
         add(deleteButton, BorderLayout.EAST);
     }
 

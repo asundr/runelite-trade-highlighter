@@ -40,6 +40,8 @@ public class SearchItemPanel extends JButton
 {
     private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, 6, 0);
     final static int SIZE_VERTICAL = 42;
+    final static int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SCROLL_PANEL_WIDTH;
+
 
     public static TradeHighlightManager tradeHighlightManager;
     static TradeHighlighterPluginPanel mainPanel;
@@ -50,7 +52,6 @@ public class SearchItemPanel extends JButton
     {
         this.itemId = itemId;
         this.itemName = itemName;
-        setLayout(new BorderLayout());
         buildPanel();
         addActionListener(this::onButtonPressed);
         setBorder(BORDER_EMPTY);
@@ -59,7 +60,8 @@ public class SearchItemPanel extends JButton
 
     private void buildPanel()
     {
-        final Dimension PREFERRED_SIZE = new Dimension(TradeHighlighterPluginPanel.SCROLL_PANEL_WIDTH, SIZE_VERTICAL);
+        setLayout(new BorderLayout());
+        final Dimension PREFERRED_SIZE = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL);
         setPreferredSize(PREFERRED_SIZE);
         setMinimumSize(PREFERRED_SIZE);
         setMaximumSize(PREFERRED_SIZE);
@@ -67,14 +69,13 @@ public class SearchItemPanel extends JButton
         //setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
         final JPanel itemWrapper = new JPanel();
-        //itemWrapper.setLayout(new BoxLayout(itemWrapper, BoxLayout.X_AXIS));
         final JLabel itemLabel = new JLabel();
         final AsyncBufferedImage img = TradeHighlighterUtils.getItemManager().getImage(itemId, 1000000, false);
         img.addTo(itemLabel);
         //itemLabel.setToolTipText(itemName);
-        itemWrapper.setPreferredSize(new Dimension(SIZE_VERTICAL + 12, SIZE_VERTICAL));
-        itemWrapper.setMaximumSize(new Dimension(SIZE_VERTICAL + 12, SIZE_VERTICAL));
-        itemWrapper.setMinimumSize(new Dimension(SIZE_VERTICAL + 12, SIZE_VERTICAL));
+        itemWrapper.setPreferredSize(new Dimension(SIZE_VERTICAL + 6, SIZE_VERTICAL));
+        itemWrapper.setMaximumSize(new Dimension(SIZE_VERTICAL + 6, SIZE_VERTICAL));
+        itemWrapper.setMinimumSize(new Dimension(SIZE_VERTICAL + 6, SIZE_VERTICAL));
         itemWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         itemWrapper.add(itemLabel);
 
@@ -98,7 +99,7 @@ public class SearchItemPanel extends JButton
         final JLabel plusLabel = new JLabel("<html><b>+</b></html>");
         plusLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
         plusWrapper.add(plusLabel);
-        plusWrapper.setBackground(new Color(0, 80, 0));
+        plusWrapper.setBackground(new Color(0, 90, 0));
         plusWrapper.setPreferredSize(new Dimension(20, SIZE_VERTICAL));
 
         add(itemWrapper, BorderLayout.WEST);

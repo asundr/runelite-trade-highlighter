@@ -109,10 +109,18 @@ public class TradeHighlighterPlugin extends Plugin
 
 	private static BufferedImage makeIcon()
 	{
+		BufferedImage icon = TradeHighlighterUtils.getImageFromName("tradehighlighter_nav_icon.png");
+		if (icon != null)
+		{
+			return icon;
+		}
 		BufferedImage img = new BufferedImage(48,48, BufferedImage.TYPE_INT_RGB);
 		Graphics g = img.getGraphics();
 		g.setColor(Color.blue);
 		g.fillRect(0, 0, 48, 48);
+		g.setColor(Color.white);
+		g.setFont(new Font(Font.MONOSPACED, 0, 72));
+		g.drawString("T", 6, 46);
 		return img;
 	}
 
