@@ -246,14 +246,14 @@ public class TradeHighlighterPluginPanel extends PluginPanel
             return;
         }
         final List<ItemPrice> result = TradeHighlighterUtils.getItemManager().search(searchQuery);
-        if (result.isEmpty())
-        {
-            itemSearchBar.setIcon(IconTextField.Icon.ERROR);
-            //errorPanel.setContent("No results found.", "No items were found with that name, please try again.");
-            //cardLayout.show(centerPanel, ERROR_PANEL);
-            itemSearchBar.setEditable(true);
-            return;
-        }
+//        if (result.isEmpty())
+//        {
+//            itemSearchBar.setIcon(IconTextField.Icon.ERROR);
+//            //errorPanel.setContent("No results found.", "No items were found with that name, please try again.");
+//            //cardLayout.show(centerPanel, ERROR_PANEL);
+//            itemSearchBar.setEditable(true);
+//            return;
+//        }
         //clientThread.invokeLater(() -> processResult(result, searchQuery, exactMatch));
         clientThread.invoke(() ->{
             int addedCount = 0, alreadyDefinedCount = 0;
@@ -277,7 +277,9 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                     break;
                 };
             }
-            searchListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, addedCount*SearchItemPanel.SIZE_VERTICAL));
+            final ArrayList<SearchItemPanel> nonGeItems = TradeHighlighterUtils.searchNonGeItems(searchQuery, MAX_SEARCH_COUNT - addedCount);
+            nonGeItems.forEach(searchListPanel::add);
+            searchListPanel.setPreferredSize(new Dimension(SCROLL_PANEL_WIDTH, (addedCount+nonGeItems.size())*SearchItemPanel.SIZE_VERTICAL));
             updateSearchPanelFooter(result.size() - (addedCount + alreadyDefinedCount));
             SwingUtilities.invokeLater(searchListPanel::updateUI);
         });

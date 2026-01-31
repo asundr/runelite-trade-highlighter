@@ -36,6 +36,8 @@ import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -78,7 +80,7 @@ public class TradeHighlighterPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		TradeHighlighterUtils.initialize(config, configManager, itemManager, gson);
+		TradeHighlighterUtils.initialize(config, configManager, clientThread, itemManager, gson);
 		HighlightDefinitionPanel.initialize(client, itemManager, colorPickerManager);
 		TradeHighlighterPluginPanel.initialize(clientThread);
 		tradeHighlightManager = new TradeHighlightManager(client, clientThread, overlayManager, itemManager, eventBus, config, notifier);
@@ -122,6 +124,15 @@ public class TradeHighlighterPlugin extends Plugin
 		g.setFont(new Font(Font.MONOSPACED, 0, 72));
 		g.drawString("T", 6, 46);
 		return img;
+	}
+
+	@Subscribe
+	private void onConfigChanged(ConfigChanged evt)
+	{
+		if (evt.getGroup().equals(config.CONFIG_GROUP) && evt.getKey().equalsIgnoreCase("nonGeIds"))
+		{
+			TradeHighlighterUtils.rebuildNonGeItemData();
+		}
 	}
 
 	@Provides TradeHighligherConfig provideConfig(ConfigManager configManager) { return configManager.getConfig(TradeHighligherConfig.class); }

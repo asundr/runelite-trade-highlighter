@@ -48,7 +48,7 @@ public class SearchItemPanel extends JButton
 
     private final int itemId;
     private final String itemName;
-    SearchItemPanel(int itemId, String itemName)
+    public SearchItemPanel(int itemId, String itemName)
     {
         this.itemId = itemId;
         this.itemName = itemName;
