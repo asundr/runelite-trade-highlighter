@@ -38,20 +38,6 @@ public class ItemIdUtils
         @Override public int hashCode() { return id; }
     }
 
-    // https://oldschool.runescape.wiki/w/Grand_Exchange/Non-tradeable_items as of Feb 1 2026
-    private static int[] unhandledItemIds = {
-            ItemID.COINS, ItemID.PLATINUM, // Currency
-            7954, 369, 357, 323, 20854, 20869, 343, 367, 3383, ItemID.BURNT_CAVE_EEL, 10140, 381, 375, 3148, 7948, 387, 399, ItemID.BURNT_ANGLERFISH, 11938, 393, // burnt seafood
-            2311, 2329, 2305, 1903, 2144, 2146, 7222,9982, 3375, 6301, 9990, 2880, 7570, 2426, 2345, 7090, 7092,  7094, 2005, 2013, 6699, 2199, 2247, 5990, 2175, 6303,   // burnt other food
-            598, 2532, 2534, 2536, 2538, 2540, 21328, 11217,  // fire arrows
-            12728, 13254, 12738, 12732, 11881, 12734, 12736, 13250, 13252, 21698, 21704, 21707, 21701, 11887, 11879, 12730,  // item packs
-            4049, 4053, 8936, 4045, 4047, 8938, 4043, 4051,  // Mini games
-            10880, 10881, 10878, 10877, 10879, 10882,  // Satchels
-            7622, 7624, 7626, 7630, 2391, 4313, 4209, 11173, 11174, 1586, 4490, 4492, 1577, 767, 968, 4462, 4002, 2964, 759, // Quest items
-            11266, 600, 583, 27485, 4496, 1575, 22361, 5978, 4291, 4293, 1633, 4073, 25571, 6675, 409, 7934, 956, 27216, 11656, 7658, 5976, 22355, // miscellaneous
-            3899, 550, 11171, 27494, 22358, 195, 4289, 4287, 1940, 2959, 2518, 3377, 13563, 733, 27488, 27491, 3224, 3209, 3805, 7738, 966, 1883 // misc continued
-    };
-
     static void rebuildNonGeItemData()
     {
         final ItemManager itemManager = TradeHighlighterUtils.getItemManager();
@@ -92,4 +78,176 @@ public class ItemIdUtils
         }
         return matches;
     }
+
+
+    // https://oldschool.runescape.wiki/w/Grand_Exchange/Non-tradeable_items as of Feb 1 2026
+    private final static int[] unhandledItemIds =
+    {
+        // Currency
+        ItemID.COINS,
+        ItemID.PLATINUM,
+
+        // burnt seafood
+        ItemID.BURNT_SHRIMP,
+        ItemID.BURNTFISH5,
+        ItemID.BURNTFISH3,
+        ItemID.BURNTFISH1,
+        ItemID.RAIDS_FISH_BURNT,
+        ItemID.RAIDS_BAT_BURNT,
+        ItemID.BURNTFISH2,
+        ItemID.BURNTFISH4,
+        ItemID.BURNT_EEL,
+        ItemID.BURNT_CAVE_EEL,
+        ItemID.HUNTING_RAW_FISH_SPECIAL_BURNT,
+        ItemID.BURNT_LOBSTER,
+        ItemID.BURNT_SWORDFISH,
+        ItemID.TBWT_BURNT_KARAMBWAN,
+        ItemID.BURNT_MONKFISH,
+        ItemID.BURNT_SHARK,
+        ItemID.BURNT_SEATURTLE,
+        ItemID.BURNT_ANGLERFISH,
+        ItemID.BURNT_DARK_CRAB,
+        ItemID.BURNT_MANTARAY,
+
+        // burnt other food
+        ItemID.BURNT_BREAD,
+        ItemID.BURNT_PIE,
+        ItemID.BURNT_PIZZA,
+        ItemID.BURNT_CAKE,
+        ItemID.BURNT_CHICKEN,
+        ItemID.BURNT_MEAT,
+        ItemID.SPIT_BURNED_RABBIT_MEAT,
+        ItemID.SPIT_BURNED_BIRD_MEAT,
+        ItemID.BURNT_SNAIL,
+        ItemID.TBW_SPIDER_ON_STICK_BURNT,
+        ItemID.SPIT_BURNED_BEAST_MEAT,
+        ItemID.RUINED_CHOMPY,
+        ItemID._100_JUBBLY_MEAT_BURNED,
+        ItemID.BURNT_UW_OOMLIE,
+        ItemID.BURNT_OOMLIE,
+        ItemID.BOWL_EGG_BURNT,
+        ItemID.BOWL_ONION_BURNT,
+        ItemID.BOWL_MUSHROOM_BURNT,
+        ItemID.BURNT_STEW,
+        ItemID.BURNT_CURRY,
+        ItemID.POTATO_BURNT,
+        ItemID.BURNT_CRUNCHIES,
+        ItemID.BURNT_BATTA,
+        ItemID.SWEETCORN_BURNT,
+        ItemID.BURNT_GNOMEBOWL,
+        ItemID.TBW_SPIDER_ON_SHAFT_BURNT,
+
+        // fire arrows
+        ItemID.UNLITARROW,
+        ItemID.IRON_UNLITARROW,
+        ItemID.STEEL_UNLITARROW,
+        ItemID.MITHRIL_UNLITARROW,
+        ItemID.ADAMANT_UNLITARROW,
+        ItemID.RUNE_UNLITARROW,
+        ItemID.AMETHYST_UNLITARROW,
+        ItemID.DRAGON_UNLITARROW,
+
+        // item packs
+        ItemID.PACK_AIRRUNE,
+        ItemID.PACK_BASKET,
+        ItemID.PACK_CHAOSRUNE,
+        ItemID.PACK_EARTHRUNE,
+        ItemID.PACK_FEATHER,
+        ItemID.PACK_FIRERUNE,
+        ItemID.PACK_MINDRUNE,
+        ItemID.PACK_PLANT_POT_COMPOST,
+        ItemID.PACK_SACK,
+        ItemID.PACK_AIRRUNE_TZHAAR,
+        ItemID.PACK_EARTHRUNE_TZHAAR,
+        ItemID.PACK_FIRERUNE_TZHAAR,
+        ItemID.PACK_WATERRUNE_TZHAAR,
+        ItemID.PACK_SLAYER_BROAD_BOLT_UNFINISHED,
+        ItemID.PACK_VIAL_WATER,
+        ItemID.PACK_WATERRUNE,
+
+        // Mini games
+        ItemID.CASTLEWARS_BANDAGES,
+        ItemID.CASTLEWARS_BARRICADE,
+        ItemID.BREW_BLUE_FLOWER,
+        ItemID.CASTLEWARS_EXPLOSIVES_POTION,
+        ItemID.CASTLEWARS_CLIMBING_ROPE,
+        ItemID.BREW_RED_FLOWER,
+        ItemID.CASTLEWARS_CATAPULT_ROCK,
+        ItemID.CASTLEWARS_TOOLKIT,
+
+        // Satchels
+        ItemID.TOL_BLACK_SACK,
+        ItemID.TOL_GOLD_SACK,
+        ItemID.TOL_GREEN_SACK,
+        ItemID.TOL_PLAIN_SACK,
+        ItemID.TOL_RED_SACK,
+        ItemID.TOL_RUNE_SACK,
+
+        // Quest items
+        ItemID.BURGH_RUBBLE_BUCKET_1,
+        ItemID.BURGH_RUBBLE_BUCKET_2,
+        ItemID.BURGH_RUBBLE_BUCKET_3,
+        ItemID.BURGH_GENERALSTORE_CRATE,
+        ItemID.GROUND_BAT_BONES,
+        ItemID.ROVING_CRYSTAL_BOOK,
+        ItemID.ROVING_CADARN_BOOK,
+        ItemID.ARRAVCERTIFICATE_LFT,
+        ItemID.ARRAVCERTIFICATE_RHT,
+        ItemID.MISC_KEY,
+        ItemID.MDAUGHTER_MUD,
+        ItemID.MDAUGHTER_ROCK,
+        ItemID.PETECANDLESTICK,
+        ItemID.PHOENIX_CROSSBOW,
+        ItemID.ROCK,
+        ItemID.FAVOUR_HERBTEA_RUINED,
+        ItemID.MM_REINITIALISATION_HINT,
+        ItemID.BOWL_EMPTY_FILLIMAN,
+        ItemID.PHOENIXKEY2,
+
+        // miscellaneous
+        ItemID.II_ANCHOVY_PASTE,
+        ItemID.BOOK_OF_ASTROLOGY,
+        ItemID.BUCKET_BAILING,
+        ItemID.HW22_TRICK_BANANA,
+        ItemID.MDAUGHTER_BROKEN_STICK,
+        ItemID.FELINEMEDAL,
+        ItemID.EASTER18_HANDEGG_CHAOS,
+        ItemID.COCONUT_SHELL,
+        ItemID.COOKED_CHICKEN_UNDEAD,
+        ItemID.COOKED_MEAT_UNDEAD,
+        ItemID.CRUSHED_GEMSTONE,
+        ItemID.DAMP_TINDERBOX,
+        ItemID.TEMPOROSS_DAMP_EGG,
+        ItemID.EMPTY_FISHFOOD_BOX,
+        ItemID.OYSTEREMPTY,
+        ItemID.PEST_FIELD_RATION,
+        ItemID.FLIER,
+        ItemID.TOA_LOOT_POO,
+        ItemID.OBSERVATORY_GLASSBLOWING_BOOK,
+        ItemID.BURGH_UNFINISHED_GUTHIX_BALANCE_1,
+        ItemID.COCONUT_HALF,
+        ItemID.EASTER18_HANDEGG_LIGHT,
+        ItemID.IRON_SICKLE,
+        ItemID.NEWCOMER_MAP,
+        ItemID.QIP_SOA_NEWSPAPER2,
+        ItemID.HW22_TRICK_WOOL,
+        ItemID.EASTER18_HANDEGG_BALANCE,
+        ItemID.ACNE_POTION,
+        ItemID.RAW_CHICKEN_UNDEAD,
+        ItemID.RAW_BEEF_UNDEAD,
+        ItemID.RAWSWAMPPASTE,
+        ItemID.ROTTEN_FOOD,
+        ItemID.ROTTEN_TOMATO,
+        ItemID.EMPTY_DYE_BOTTLE,
+        ItemID.LOVAKENGJ_EQUIPMENT_CRATE,
+        ItemID.SMASHED_GLASS,
+        ItemID.HW22_TRICK_SOCK,
+        ItemID.HW22_TRICK_EGG,
+        ItemID.REGICIDE_CLOTH,
+        ItemID.REGICIDE_SULPHAR,
+        ItemID.VIKING_TANKARD_EMPTY,
+        ItemID.POH_TEA_LEAVES,
+        ItemID.ROOFTILE,
+        ItemID.UGTHANKI_KEBAB_BAD
+    };
 }
