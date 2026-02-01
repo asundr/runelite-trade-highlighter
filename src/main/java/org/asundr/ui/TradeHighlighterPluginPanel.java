@@ -222,14 +222,6 @@ public class TradeHighlighterPluginPanel extends PluginPanel
             return;
         }
         final List<ItemPrice> result = TradeHighlighterUtils.getItemManager().search(searchQuery);
-//        if (result.isEmpty())
-//        {
-//            itemSearchBar.setIcon(IconTextField.Icon.ERROR);
-//            //errorPanel.setContent("No results found.", "No items were found with that name, please try again.");
-//            //cardLayout.show(centerPanel, ERROR_PANEL);
-//            itemSearchBar.setEditable(true);
-//            return;
-//        }
         TradeHighlighterUtils.getClientThread().invoke(() ->{
             int addedCount = 0, alreadyDefinedCount = 0;
             for (final ItemPrice item : result)
@@ -252,7 +244,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
                     break;
                 };
             }
-            final ArrayList<SearchItemPanel> nonGeItems = TradeHighlighterUtils.matchNonGeItems(searchQuery);
+            final ArrayList<SearchItemPanel> nonGeItems = ItemIdUtils.matchNonGeItems(searchQuery);
             for (final SearchItemPanel itemPanel : nonGeItems)
             {
                 if (addedCount >= MAX_SEARCH_COUNT)

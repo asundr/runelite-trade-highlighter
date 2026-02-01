@@ -77,6 +77,7 @@ public class TradeHighlighterPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		TradeHighlighterUtils.initialize(config, configManager, client, clientThread, itemManager, colorPickerManager, gson);
+		ItemIdUtils.rebuildNonGeItemData();
 		tradeHighlightManager = new TradeHighlightManager(overlayManager, eventBus, notifier);
 		TradeHighlighterUtils.setTradeHighlightManager(tradeHighlightManager);
 		mainPanel = new TradeHighlighterPluginPanel(tradeHighlightManager);

@@ -78,7 +78,7 @@ public class TradeHighlightManager
         {
             if (evt.getKey().equalsIgnoreCase(TradeHighligherConfig.KEY_NON_GE_IDS))
             {
-                TradeHighlighterUtils.rebuildNonGeItemData();
+                ItemIdUtils.rebuildNonGeItemData();
             }
         }
     }
