@@ -25,102 +25,90 @@
 
 package org.asundr.ui;
 
-import net.runelite.api.Client;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.AsyncBufferedImage;
 import org.asundr.HighlightDefinition;
-import org.asundr.TradeHighlightManager;
 import org.asundr.TradeHighlighterUtils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class HighlightDefinitionPanel extends JPanel
 {
     private static final int SIZE_VERTICAL = 40;
     private static final int SPACING_VERTICAL = 6;
+    private static final int SIZE_DELETE_X = 20;
     private static final int SIZE_VERTICAL_FULL = SIZE_VERTICAL + SPACING_VERTICAL;
-    private static final int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SCROLL_PANEL_WIDTH;
-
-    private static final int SIZE_ITEM_ICON = SIZE_VERTICAL;
-    private static final Dimension DIMENSION_ITEM_ICON = new Dimension(SIZE_ITEM_ICON - 2, SIZE_VERTICAL);
-
+    private static final int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SIZE_SCROLL_PANEL_WIDTH;
+    private static final int SIZE_ITEM_ICON_X = SIZE_VERTICAL - 2;
+    private static final int SIZE_COLOR_SELECTOR = SIZE_VERTICAL - 16;
+    private static final int SIZE_OPTION_X = 25;
+    private static final int SIZE_CONTENTS_X = SIZE_HORIZONTAL - SIZE_ITEM_ICON_X - SIZE_DELETE_X;
+    private static final int SIZE_NAME_X = SIZE_CONTENTS_X - 2 * SIZE_OPTION_X - 20; // was 85
+    private static final Dimension DIMENSION_COLOR_BUTTON = new Dimension(SIZE_COLOR_SELECTOR, SIZE_COLOR_SELECTOR);
+    private static final Dimension DIMENSION_COLOR_BUTTON_WRAPPER = new Dimension(SIZE_OPTION_X, SIZE_VERTICAL);
+    private static final Dimension DIMENSION_ITEM_ICON = new Dimension(SIZE_ITEM_ICON_X, SIZE_VERTICAL);
+    private static final Dimension DIMENSION_CONTENTS = new Dimension(SIZE_CONTENTS_X, SIZE_VERTICAL/2);
+    private static final Dimension DIMENSION_CHECKBOX_WRAPPER = new Dimension(SIZE_OPTION_X, SIZE_VERTICAL);
+    private static final Dimension DIMENSION_DELETE_BUTTON = new Dimension(SIZE_DELETE_X, SIZE_VERTICAL_FULL);
+    private static final Dimension DIMENSION_PANEL = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
+    private static final Dimension PREFERRED_DIMENSION_TEXT = new Dimension(SIZE_NAME_X, SIZE_VERTICAL);
     private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, SPACING_VERTICAL, 0);
+    private final static Border BORDER_NAME_PADDING = BorderFactory.createEmptyBorder(0, 0, 16, 0);
     private final static Border BORDER_NOTIFY = BorderFactory.createLineBorder(ColorScheme.MEDIUM_GRAY_COLOR);
-
-
-    private static final int SIZE_COLOR_SELECTOR = SIZE_ITEM_ICON - 16;
-    private static final Dimension COLOR_SELECTOR_SIZE = new Dimension(SIZE_COLOR_SELECTOR, SIZE_COLOR_SELECTOR);
     private static final Color COLOR_BASE = new Color(30,30,30);
+    private static final Color COLOR_DELETE_BUTTON = new Color(70, 0 ,0);
+    private static final String TEXT_DELETE_SYMBOL = "×";
+    private static final String TEXT_COLOR_PICKER_TITLE = "Trade Highlight";
+    private static final String TEMPLATE_TOOLTIP_DELETE = "Delete definition for %s";
+    private static final String TOOLTIP_COLOR_BUTTON = "Select the highlight color";
+    private static final String TOOLTIP_NOTIFY_CHECKBOX = "Enable to send notification when this item is offered by the other player";
     private static final float BACKGROUND_COLOR_ALPHA = 0.02f;
 
     //private static final ImageIcon ICON_NOTIFY = TradeHighlighterUtils.getIconFromName("notify.png", 20, 20, Image.SCALE_SMOOTH);
 
-    private static Client client;
-    private static ItemManager itemManager;
-    private static ColorPickerManager colorPickerManager;
-
     private final HighlightDefinition definition;
-
     private final JPanel itemWrapper = new JPanel();
 
-    public static int getSizeVertical() { return SIZE_VERTICAL_FULL; }
-
-    public HighlightDefinitionPanel(HighlightDefinition definition, TradeHighlightManager tradeHighlightManager)
+    public HighlightDefinitionPanel(HighlightDefinition definition)
     {
         this.definition = definition;
-        buildPanel(tradeHighlightManager);
+        buildPanel();
         setBorder(BORDER_EMPTY);
     }
 
-    public static void initialize(Client client, ItemManager itemManager, ColorPickerManager colorPickerManager)
-    {
-        HighlightDefinitionPanel.client = client;
-        HighlightDefinitionPanel.itemManager = itemManager;
-        HighlightDefinitionPanel.colorPickerManager = colorPickerManager;
-    }
-
-    public HighlightDefinition getDefinition() { return definition; }
-
-    private void buildPanel(TradeHighlightManager tradeHighlightManager)
+    private void buildPanel()
     {
         setLayout(new BorderLayout());
-        final Dimension PREFERRED_SIZE = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
-        setPreferredSize(PREFERRED_SIZE);
-        setMinimumSize(PREFERRED_SIZE);
-        setMaximumSize(PREFERRED_SIZE);
+        TradeHighlighterUtils.setFixedSize(this, DIMENSION_PANEL);
 
         // add item label, item name tooltip
         buildItemLabel();
 
+        // Add item name, color selector, and notify checkbox
         final JPanel contents = new JPanel();
-        contents.setPreferredSize(new Dimension(SIZE_HORIZONTAL, SIZE_ITEM_ICON/2));
+        TradeHighlighterUtils.setFixedSize(contents, DIMENSION_CONTENTS);
         contents.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        add(contents, BorderLayout.CENTER);
         buildItemName(contents);
         buildColorSelector(contents);
         buildNotifyCheckbox(contents);
+        add(contents, BorderLayout.CENTER);
 
-        buildDeleteButton(tradeHighlightManager);
+        // Add delete button
+        buildDeleteButton();
         setToolTipText(definition.getName());
     }
 
     private void buildItemLabel()
     {
         final JLabel itemLabel = new JLabel();
-        final AsyncBufferedImage img = getItemImage(definition.getId());
+        final AsyncBufferedImage img = TradeHighlighterUtils.getItemImage(definition.getId());
         img.addTo(itemLabel);
         itemWrapper.add(itemLabel);
-        itemWrapper.setPreferredSize(DIMENSION_ITEM_ICON);
-        itemWrapper.setMaximumSize(DIMENSION_ITEM_ICON);
-        itemWrapper.setMinimumSize(DIMENSION_ITEM_ICON);
         itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, definition.getColor(), BACKGROUND_COLOR_ALPHA));
+        TradeHighlighterUtils.setFixedSize(itemWrapper, DIMENSION_ITEM_ICON);
         add(itemWrapper, BorderLayout.WEST);
     }
 
@@ -130,49 +118,35 @@ public class HighlightDefinitionPanel extends JPanel
         final JLabel nameLabel = new JLabel(definition.getName());
         nameWrapper.add(nameLabel);
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        final Dimension PREFERRED_DIMENSION_TEXT = new Dimension(85, SIZE_VERTICAL);
-        nameLabel.setPreferredSize(PREFERRED_DIMENSION_TEXT);
-        nameLabel.setMaximumSize(PREFERRED_DIMENSION_TEXT);
-        nameLabel.setMinimumSize(PREFERRED_DIMENSION_TEXT);
-        nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
-
-        nameWrapper.setPreferredSize(PREFERRED_DIMENSION_TEXT);
-        nameWrapper.setMaximumSize(PREFERRED_DIMENSION_TEXT);
-        nameWrapper.setMinimumSize(PREFERRED_DIMENSION_TEXT);
+        TradeHighlighterUtils.setFixedSize(nameLabel, PREFERRED_DIMENSION_TEXT);
+        TradeHighlighterUtils.setFixedSize(nameWrapper, PREFERRED_DIMENSION_TEXT);
+        nameLabel.setBorder(BORDER_NAME_PADDING);
         parent.add(nameWrapper);
     }
 
     private void buildColorSelector(JPanel parent)
     {
         final JPanel colorButtonWrapper = new JPanel();
-        JButton colorButton = new JButton();
-        colorButton.setBackground(definition.getColor());
-        colorButton.addActionListener(new ActionListener(){
-            @Override public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(() ->
-                {
-                    RuneliteColorPicker colorPicker = colorPickerManager.create(client, definition.getColor(), "Trade Highlight", true);
-                    colorPicker.setOnClose(c ->
-                    {
-                        definition.setColor(c);
-                        colorButton.setBackground(c);
-                        itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, c, BACKGROUND_COLOR_ALPHA));
-                        TradeHighlighterUtils.saveDefinitions();
-                    });
-                    colorPicker.setLocationRelativeTo(colorButton);
-                    colorPicker.setVisible(true);
-                });
-
-            }
-        });
-        final Dimension wrapperDimension = new Dimension(25, SIZE_VERTICAL);
-        colorButtonWrapper.setPreferredSize(wrapperDimension);
         colorButtonWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        TradeHighlighterUtils.setFixedSize(colorButtonWrapper, DIMENSION_COLOR_BUTTON_WRAPPER);
 
-        colorButton.setToolTipText("Select the highlight color");
-        colorButton.setPreferredSize(COLOR_SELECTOR_SIZE);
-        colorButton.setMinimumSize(COLOR_SELECTOR_SIZE);
-        colorButton.setMaximumSize(COLOR_SELECTOR_SIZE);
+        final JButton colorButton = new JButton();
+        TradeHighlighterUtils.setFixedSize(colorButton, DIMENSION_COLOR_BUTTON);
+        colorButton.setBackground(definition.getColor());
+        colorButton.setToolTipText(TOOLTIP_COLOR_BUTTON);
+        colorButton.addActionListener(event -> SwingUtilities.invokeLater(() ->
+        {
+            final RuneliteColorPicker colorPicker = TradeHighlighterUtils.createColorPicker(definition.getColor(), TEXT_COLOR_PICKER_TITLE, true);
+            colorPicker.setOnClose(c ->
+            {
+                definition.setColor(c);
+                colorButton.setBackground(c);
+                itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, c, BACKGROUND_COLOR_ALPHA));
+                TradeHighlighterUtils.saveDefinitions();
+            });
+            colorPicker.setLocationRelativeTo(colorButton);
+            colorPicker.setVisible(true);
+        }));
 
         colorButtonWrapper.add(colorButton);
         parent.add(colorButtonWrapper);
@@ -180,43 +154,36 @@ public class HighlightDefinitionPanel extends JPanel
 
     private void buildNotifyCheckbox(JPanel parent)
     {
+        final JPanel checkboxWrapper = new JPanel();
+        checkboxWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        TradeHighlighterUtils.setFixedSize(checkboxWrapper, DIMENSION_CHECKBOX_WRAPPER);
+
         JCheckBox checkbox = new JCheckBox();
         checkbox.setSelected(definition.getNotify());
         checkbox.addActionListener(e -> {
             definition.setNotify(checkbox.isSelected());
             TradeHighlighterUtils.saveDefinitions();
         });
-
-        final JPanel checkboxWrapper = new JPanel();
-        final Dimension wrapperDimension = new Dimension(25, SIZE_VERTICAL);
-        checkboxWrapper.setPreferredSize(wrapperDimension);
-        checkboxWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
-        checkbox.setToolTipText("Enable to send notification when this item is offered by the other player");
         checkbox.setBorder(BORDER_NOTIFY);
-
         checkbox.setBackground(Color.black);
         checkbox.setOpaque(true);
+        checkbox.setToolTipText(TOOLTIP_NOTIFY_CHECKBOX);
 
         checkboxWrapper.add(checkbox);
         parent.add(checkboxWrapper);
     }
 
-    private void buildDeleteButton(TradeHighlightManager tradeHighlightManager)
+    private void buildDeleteButton()
     {
-        JButton deleteButton = new JButton("×");
-        deleteButton.setPreferredSize(new Dimension(20, SIZE_VERTICAL_FULL));
-        deleteButton.addActionListener(e -> tradeHighlightManager.removeDefinition(definition.getId()));
-        deleteButton.setToolTipText("Delete definition for " + definition.getName());
-        deleteButton.setBackground(new Color(70, 0 ,0));
+        JButton deleteButton = new JButton(TEXT_DELETE_SYMBOL);
+        deleteButton.setPreferredSize(DIMENSION_DELETE_BUTTON);
+        deleteButton.addActionListener(e -> TradeHighlighterUtils.getTradeHighlightManager().removeDefinition(definition.getId()));
+        deleteButton.setToolTipText(String.format(TEMPLATE_TOOLTIP_DELETE, definition.getName()));
+        deleteButton.setBackground(COLOR_DELETE_BUTTON);
         deleteButton.setBorderPainted(false);
         add(deleteButton, BorderLayout.EAST);
     }
 
-    private static AsyncBufferedImage getItemImage(int id)
-    {
-        return itemManager.getImage(id, 1000000, false);
-    }
-
-
+    public HighlightDefinition getDefinition() { return definition; }
+    public static int getFullHeight() { return SIZE_VERTICAL_FULL; }
 }

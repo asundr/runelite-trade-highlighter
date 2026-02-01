@@ -25,61 +25,42 @@
 
 package org.asundr;
 
-import com.google.gson.Gson;
-import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.Notifier;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.ItemManager;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.ui.overlay.OverlayManager;
-import org.asundr.ui.SearchItemPanel;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 public class TradeHighlightManager
 {
-    public static final int RECEIVED_CONTAINER = InventoryID.TRADEOFFER | 0x8000;
-    public static final int TRADE_MENU = 335;
-    public static final int TRADE_OTHER_CHILD_ID = 28;
-    public static final int TRADE_MINE_CHILD_ID = 25;
+    private static final int RECEIVED_CONTAINER = InventoryID.TRADEOFFER | 0x8000;
+    private static final int TRADE_MENU = 335;
+    private static final int TRADE_OTHER_CHILD_ID = 28;
+    private static final int TRADE_MINE_CHILD_ID = 25;
+    private static final String TEMPLATE_NOTIFY_WARNING = "WARNING: Other player offered %s!";
 
-    private final Client client;
-    private final ClientThread clientThread;
-    private final ItemManager itemManager;
-    private final Notifier notifier;
-    private final EventBus eventBus;
-    private final OverlayManager overlayManager;
+    private static Notifier notifier;
+    private static EventBus eventBus;
+    private static OverlayManager overlayManager;
 
-    final TradeHighlightOverlay tradeHighlightOverlay;
-    HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
-    final ArrayList<Widget> highlighted = new ArrayList<>();
-    HashSet<Integer> previousIds = new HashSet<>();
+    private final TradeHighlightOverlay tradeHighlightOverlay;
+    private HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
+    private final ArrayList<Widget> highlighted = new ArrayList<>();
+    private HashSet<Integer> previousIds = new HashSet<>();
 
-    static TradeHighligherConfig config;
-
-    TradeHighlightManager(Client client, ClientThread clientThread, OverlayManager overlayManager, ItemManager itemManager, EventBus eventBus, TradeHighligherConfig config, Notifier notifier)
+    TradeHighlightManager(OverlayManager overlayManager, EventBus eventBus, Notifier notifier)
     {
-
-        TradeHighlightManager.config = config;
-        SearchItemPanel.tradeHighlightManager = this;
-
-        this.client = client;
-        this.clientThread = clientThread;
-        this.itemManager = itemManager;
-        this.notifier = notifier;
-        this.eventBus = eventBus;
-        this.overlayManager = overlayManager;
-        tradeHighlightOverlay = new TradeHighlightOverlay(this, itemManager);
+        TradeHighlightManager.notifier = notifier;
+        TradeHighlightManager.eventBus = eventBus;
+        TradeHighlightManager.overlayManager = overlayManager;
+        tradeHighlightOverlay = new TradeHighlightOverlay(this);
         overlayManager.add(tradeHighlightOverlay);
         eventBus.register(this);
     }
@@ -91,6 +72,18 @@ public class TradeHighlightManager
     }
 
     @Subscribe
+    private void onConfigChanged(ConfigChanged evt)
+    {
+        if (evt.getGroup().equals(TradeHighligherConfig.CONFIG_GROUP))
+        {
+            if (evt.getKey().equalsIgnoreCase(TradeHighligherConfig.KEY_NON_GE_IDS))
+            {
+                TradeHighlighterUtils.rebuildNonGeItemData();
+            }
+        }
+    }
+
+    @Subscribe
     private void onItemContainerChanged(ItemContainerChanged container)
     {
         if (container.getContainerId() != RECEIVED_CONTAINER)
@@ -98,27 +91,22 @@ public class TradeHighlightManager
             return;
         }
         highlighted.clear();
-        clientThread.invokeLater(() ->
+        TradeHighlighterUtils.getClientThread().invokeLater(() ->
         {
-            HashSet<Integer> currIds = new HashSet<>();
-            final Widget widget = client.getWidget(TRADE_MENU, TRADE_OTHER_CHILD_ID);
+            final HashSet<Integer> currIds = new HashSet<>();
+            final Widget widget = TradeHighlighterUtils.getWidget(TRADE_MENU, TRADE_OTHER_CHILD_ID);
             if (widget != null)
             {
                 for (Widget child : Objects.requireNonNull(widget.getChildren()))
                 {
-                    int id = child.getItemId();
-                    final ItemComposition comp = itemManager.getItemComposition(id);
-                    if (comp.getNote() != -1)
-                    {
-                        id = comp.getLinkedNoteId();
-                    }
+                    final int id = TradeHighlighterUtils.getUnnotedId(child.getItemId());
                     if (definitions.containsKey(id))
                     {
                         highlighted.add(child);
                         final HighlightDefinition definition = definitions.get(id);
                         if (definition.getNotify() && !previousIds.contains(id))
                         {
-                            notifier.notify(String.format("WARNING: Other player offered %s!", definition.getName()), TrayIcon.MessageType.WARNING);
+                            notifier.notify(String.format(TEMPLATE_NOTIFY_WARNING, definition.getName()), TrayIcon.MessageType.WARNING);
                         }
                         currIds.add(id);
                     }
@@ -139,19 +127,14 @@ public class TradeHighlightManager
         }
     }
 
-    public boolean hasDefinition(int itemId)
-    {
-        return definitions.containsKey(itemId);
-    }
-
     public void addDefinition(HighlightDefinition definition)
     {
         if (definitions.containsKey(definition.getId()))
         {
             return;
         }
-        clientThread.invoke(() -> {
-            definition.setName(itemManager.getItemComposition(definition.getId()).getMembersName());
+        TradeHighlighterUtils.getClientThread().invoke(() -> {
+            definition.setName(TradeHighlighterUtils.getItemManager().getItemComposition(definition.getId()).getMembersName());
             definitions.put(definition.getId(), definition);
             eventBus.post(new EventDefinitionAdded(definition));
             TradeHighlighterUtils.saveDefinitions();
@@ -170,15 +153,22 @@ public class TradeHighlightManager
 
     public void refreshDefinition(final HashMap<Integer, HighlightDefinition> definitions)
     {
-        clientThread.invoke(() ->
+        TradeHighlighterUtils.getClientThread().invoke(() ->
         {
             for (HighlightDefinition definition : definitions.values())
             {
-                definition.setName(itemManager.getItemComposition(definition.getId()).getMembersName());
+                definition.setName(TradeHighlighterUtils.getItemManager().getItemComposition(definition.getId()).getMembersName());
             }
             this.definitions = definitions;
             eventBus.post(new EventDefinitionsRefreshed(definitions));
         });
     }
 
+    public ArrayList<Widget> getHighlighted() { return highlighted; }
+    public boolean hasDefinition(int itemId)
+    {
+        return definitions.containsKey(itemId);
+    }
+    public HighlightDefinition getDefinition(int itemID) { return definitions.get(itemID); }
+    public Collection<HighlightDefinition> getDefinitions() { return definitions.values(); }
 }

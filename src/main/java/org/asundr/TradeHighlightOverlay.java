@@ -27,48 +27,49 @@ package org.asundr;
 
 import net.runelite.api.ItemComposition;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 
 import java.awt.*;
 
-public class TradeHighlightOverlay extends Overlay {
+public class TradeHighlightOverlay extends Overlay
+{
+    private static final int BOUNDS_OFFSET_X = -8;
+    private static final int BOUNDS_OFFSET_Y = -7;
+    private static final int BOUNDS_OFFSET_WIDTH = 0;
+    private static final int BOUNDS_OFFSET_HEIGHT = 2;
 
     final private TradeHighlightManager tradeHighlightManager;
-    final private ItemManager itemManager;
 
-    TradeHighlightOverlay(TradeHighlightManager tradeHighlightManager, ItemManager itemManager)
+    TradeHighlightOverlay(TradeHighlightManager tradeHighlightManager)
     {
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
         this.tradeHighlightManager = tradeHighlightManager;
-        this.itemManager = itemManager;
     }
 
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        for (final Widget widget : tradeHighlightManager.highlighted)
+        for (final Widget widget : tradeHighlightManager.getHighlighted())
         {
             if (widget == null || widget.getItemId() == -1)
             {
                 continue;
             }
             int id = widget.getItemId();
-            final ItemComposition comp = itemManager.getItemComposition(id);
+            final ItemComposition comp = TradeHighlighterUtils.getItemManager().getItemComposition(id);
             if (comp.getNote() != -1)
             {
                 id = comp.getLinkedNoteId();
             }
-            if (tradeHighlightManager.definitions.containsKey(id))
+            if (tradeHighlightManager.hasDefinition(id))
             {
                 final Rectangle bounds = widget.getBounds();
-                bounds.x -=  8;
-                bounds.y -=  7;
-                bounds.width +=  0;
-                bounds.height +=  2;
-                Color color = tradeHighlightManager.definitions.get(id).getColor();
-                graphics.setColor(color);
+                bounds.x += BOUNDS_OFFSET_X;
+                bounds.y +=  BOUNDS_OFFSET_Y;
+                bounds.width +=  BOUNDS_OFFSET_WIDTH;
+                bounds.height +=  BOUNDS_OFFSET_HEIGHT;
+                graphics.setColor(tradeHighlightManager.getDefinition(id).getColor());
                 graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
             }
         }

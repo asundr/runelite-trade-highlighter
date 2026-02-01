@@ -36,6 +36,8 @@ import java.awt.*;
 public interface TradeHighligherConfig extends Config
 {
 	String CONFIG_GROUP = "trade-highlighter";
+	String KEY_DEFINITIONS = "definitions";
+	String KEY_NON_GE_IDS = "nonGeIds";
 
 	@ConfigSection(
 			name = "General",
@@ -59,8 +61,6 @@ public interface TradeHighligherConfig extends Config
 	String SECTION_ADVANCED = "advanced";
 
 	/////
-
-
 
 	@ConfigItem(
 		keyName = "enableNotifications",
@@ -87,7 +87,7 @@ public interface TradeHighligherConfig extends Config
 	default boolean defaultNotify() { return false; }
 
 	@ConfigItem(
-			keyName = "nonGeIds",
+			keyName = KEY_NON_GE_IDS,
 			name = "Custom item IDs",
 			description = "Comma-separated list of item IDs that will allow those items to be added for highlighting." +
 					"<br>Useful for new tradeable items that cannot be put in the GE that are not yet handled by the plugin." +

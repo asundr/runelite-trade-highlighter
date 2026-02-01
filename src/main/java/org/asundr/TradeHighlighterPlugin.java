@@ -28,7 +28,6 @@ package org.asundr;
 import com.google.gson.Gson;
 import com.google.inject.Provides;
 import javax.inject.Inject;
-import javax.swing.*;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -36,8 +35,6 @@ import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -45,7 +42,6 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
-import org.asundr.ui.HighlightDefinitionPanel;
 import org.asundr.ui.TradeHighlighterPluginPanel;
 
 import java.awt.*;
@@ -80,10 +76,9 @@ public class TradeHighlighterPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		TradeHighlighterUtils.initialize(config, configManager, clientThread, itemManager, gson);
-		HighlightDefinitionPanel.initialize(client, itemManager, colorPickerManager);
-		TradeHighlighterPluginPanel.initialize(clientThread);
-		tradeHighlightManager = new TradeHighlightManager(client, clientThread, overlayManager, itemManager, eventBus, config, notifier);
+		TradeHighlighterUtils.initialize(config, configManager, client, clientThread, itemManager, colorPickerManager, gson);
+		tradeHighlightManager = new TradeHighlightManager(overlayManager, eventBus, notifier);
+		TradeHighlighterUtils.setTradeHighlightManager(tradeHighlightManager);
 		mainPanel = new TradeHighlighterPluginPanel(tradeHighlightManager);
 		eventBus.register(mainPanel);
 		addNavigationButton(mainPanel);
@@ -124,15 +119,6 @@ public class TradeHighlighterPlugin extends Plugin
 		g.setFont(new Font(Font.MONOSPACED, 0, 72));
 		g.drawString("T", 6, 46);
 		return img;
-	}
-
-	@Subscribe
-	private void onConfigChanged(ConfigChanged evt)
-	{
-		if (evt.getGroup().equals(config.CONFIG_GROUP) && evt.getKey().equalsIgnoreCase("nonGeIds"))
-		{
-			TradeHighlighterUtils.rebuildNonGeItemData();
-		}
 	}
 
 	@Provides TradeHighligherConfig provideConfig(ConfigManager configManager) { return configManager.getConfig(TradeHighligherConfig.class); }

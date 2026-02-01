@@ -30,9 +30,6 @@ import java.util.HashMap;
 public class EventDefinitionsRefreshed
 {
     final private HashMap<Integer, HighlightDefinition> definitions;
-    EventDefinitionsRefreshed(HashMap<Integer, HighlightDefinition> definitions)
-    {
-        this.definitions = definitions;
-    }
+    EventDefinitionsRefreshed(HashMap<Integer, HighlightDefinition> definitions) { this.definitions = definitions; }
     public HashMap<Integer, HighlightDefinition> getDefinitions() { return definitions; }
 }
