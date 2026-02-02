@@ -63,12 +63,20 @@ public interface TradeHighligherConfig extends Config
 	/////
 
 	@ConfigItem(
-		keyName = "enableNotifications",
-		name = "Enable Notifications",
-		description = "If true, items that have been set to notify will do so once offered by the the other player",
+		keyName = "enableOfferNotifications",
+		name = "Enable offer notification",
+		description = "If true, items that have been set to notify will do so once offered by the other player",
 		section = SECTION_GENERAL
 	)
-	default boolean enableNotifications() { return true; }
+	default boolean enableOfferNotifications() { return true; }
+
+	@ConfigItem(
+			keyName = "enableConfirmNotifications",
+			name = "Enable confirm notification",
+			description = "If true, you will be notified upon entering the trade confirmation window if the other player has offered any items set to notify",
+			section = SECTION_GENERAL
+	)
+	default boolean enableConfirmNotifications() { return true; }
 
 	@ConfigItem(
 			keyName = "defaultColor",

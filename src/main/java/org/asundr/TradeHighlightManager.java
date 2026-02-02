@@ -100,7 +100,6 @@ public class TradeHighlightManager
         TradeHighlighterUtils.getClientThread().invokeLater(() ->
         {
             final HashSet<Integer> currIds = new HashSet<>();
-
             final Widget widget = TradeHighlighterUtils.getWidget(TRADE_MENU, TRADE_OTHER_CHILD_ID);
             if (widget != null)
             {
@@ -111,7 +110,7 @@ public class TradeHighlightManager
                     if (definitions.containsKey(id))
                     {
                         final HighlightDefinition definition = definitions.get(id);
-                        if (definition.getNotify() && !previousIds.contains(id))
+                        if (TradeHighlighterUtils.getConfig().enableOfferNotifications() && definition.getNotify() && !previousIds.contains(id))
                         {
                             notifier.notify(String.format(TEMPLATE_NOTIFY_WARNING_OFFER, definition.getName()), TrayIcon.MessageType.WARNING);
                         }
@@ -144,7 +143,7 @@ public class TradeHighlightManager
         if (evt.getGroupId() == TRADE_MENU)
         {
             TradeHighlighterUtils.getClientThread().invokeLater(() ->{
-                if (TradeHighlighterUtils.getWidget(InterfaceID.TRADECONFIRM, 0) != null)
+                if (TradeHighlighterUtils.getConfig().enableConfirmNotifications() && TradeHighlighterUtils.getWidget(InterfaceID.TRADECONFIRM, 0) != null)
                 {
                     final String list = offeredNameMap.values().stream().filter(HighlightDefinition::getNotify)
                             .map(HighlightDefinition::getName).reduce("", (acc, name) -> acc + ", " + name);
