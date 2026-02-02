@@ -25,23 +25,21 @@
 
 package org.asundr;
 
-import net.runelite.api.ItemComposition;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 
 import java.awt.*;
+import java.util.regex.Pattern;
 
-public class TradeHighlightOverlay extends Overlay
+public class HighlightConfirmOverlay extends Overlay
 {
-    private static final int BOUNDS_OFFSET_X = -8;
-    private static final int BOUNDS_OFFSET_Y = -7;
-    private static final int BOUNDS_OFFSET_WIDTH = 0;
-    private static final int BOUNDS_OFFSET_HEIGHT = 2;
+    private static final Pattern p = Pattern.compile("([^<]+)");
 
     final private TradeHighlightManager tradeHighlightManager;
 
-    TradeHighlightOverlay(TradeHighlightManager tradeHighlightManager)
+    HighlightConfirmOverlay(TradeHighlightManager tradeHighlightManager)
     {
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
         this.tradeHighlightManager = tradeHighlightManager;
@@ -50,27 +48,29 @@ public class TradeHighlightOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        for (final Widget widget : tradeHighlightManager.getHighlighted())
+        final Widget confirmWidgetOther = TradeHighlighterUtils.getWidget(InterfaceID.TRADECONFIRM, 29);
+        if (confirmWidgetOther == null)
         {
-            if (widget == null || widget.getItemId() == -1)
+            return  null;
+        }
+        for (int i = 0; i < 28; ++i)
+        {
+            final Widget child = confirmWidgetOther.getChild(i);
+            if (child == null)
             {
                 continue;
             }
-            int id = widget.getItemId();
-            final ItemComposition comp = TradeHighlighterUtils.getItemManager().getItemComposition(id);
-            if (comp.getNote() != -1)
+            final java.util.regex.Matcher matcher = p.matcher(child.getText());
+            if (matcher.find())
             {
-                id = comp.getLinkedNoteId();
-            }
-            if (tradeHighlightManager.hasDefinition(id))
-            {
-                final Rectangle bounds = widget.getBounds();
-                bounds.x += BOUNDS_OFFSET_X;
-                bounds.y +=  BOUNDS_OFFSET_Y;
-                bounds.width +=  BOUNDS_OFFSET_WIDTH;
-                bounds.height +=  BOUNDS_OFFSET_HEIGHT;
-                graphics.setColor(tradeHighlightManager.getDefinition(id).getColor());
-                graphics.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+                final String name = matcher.group(1).toLowerCase();
+                final HighlightDefinition def = tradeHighlightManager.getOfferedNameMap().get(name);
+                if (def != null)
+                {
+                    final Rectangle bounds = child.getBounds();
+                    graphics.setColor(def.getColor());
+                    graphics.drawRect(bounds.x - 4, bounds.y - bounds.height - 2, bounds.width - 2, bounds.height - 6);
+                }
             }
         }
         return null;

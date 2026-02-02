@@ -27,6 +27,7 @@ package org.asundr;
 
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.WidgetClosed;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.Notifier;
@@ -44,15 +45,17 @@ public class TradeHighlightManager
     private static final int TRADE_MENU = 335;
     private static final int TRADE_OTHER_CHILD_ID = 28;
     private static final int TRADE_MINE_CHILD_ID = 25;
-    private static final String TEMPLATE_NOTIFY_WARNING = "WARNING: Other player offered %s!";
+    private static final String TEMPLATE_NOTIFY_WARNING_OFFER = "WARNING: Other player offered %s!";
+    private static final String TEMPLATE_NOTIFY_WARNING_CONFIRM = "WARNING: About to confirm trade with highlighted items: %s!";
 
     private static Notifier notifier;
     private static EventBus eventBus;
     private static OverlayManager overlayManager;
 
-    private final TradeHighlightOverlay tradeHighlightOverlay;
+    private final HighlightConfirmOverlay highlightConfirmOverlay;
+    private final HighlightOfferOverlay highlightOfferOverlay;
     private HashMap<Integer, HighlightDefinition> definitions = new HashMap<>();
-    private final ArrayList<Widget> highlighted = new ArrayList<>();
+    private final HashMap<String, HighlightDefinition> offeredNameMap = new HashMap<>();
     private HashSet<Integer> previousIds = new HashSet<>();
 
     TradeHighlightManager(OverlayManager overlayManager, EventBus eventBus, Notifier notifier)
@@ -60,15 +63,18 @@ public class TradeHighlightManager
         TradeHighlightManager.notifier = notifier;
         TradeHighlightManager.eventBus = eventBus;
         TradeHighlightManager.overlayManager = overlayManager;
-        tradeHighlightOverlay = new TradeHighlightOverlay(this);
-        overlayManager.add(tradeHighlightOverlay);
+        highlightConfirmOverlay = new HighlightConfirmOverlay(this);
+        highlightOfferOverlay = new HighlightOfferOverlay(this);
+        overlayManager.add(highlightConfirmOverlay);
+        overlayManager.add(highlightOfferOverlay);
         eventBus.register(this);
     }
 
     public void shutdown()
     {
         eventBus.unregister(this);
-        overlayManager.remove(tradeHighlightOverlay);
+        overlayManager.remove(highlightConfirmOverlay);
+        overlayManager.remove(highlightOfferOverlay);
     }
 
     @Subscribe
@@ -90,28 +96,43 @@ public class TradeHighlightManager
         {
             return;
         }
-        highlighted.clear();
+        offeredNameMap.clear();
         TradeHighlighterUtils.getClientThread().invokeLater(() ->
         {
             final HashSet<Integer> currIds = new HashSet<>();
+
             final Widget widget = TradeHighlighterUtils.getWidget(TRADE_MENU, TRADE_OTHER_CHILD_ID);
             if (widget != null)
             {
                 for (Widget child : Objects.requireNonNull(widget.getChildren()))
                 {
                     final int id = TradeHighlighterUtils.getUnnotedId(child.getItemId());
+
                     if (definitions.containsKey(id))
                     {
-                        highlighted.add(child);
                         final HighlightDefinition definition = definitions.get(id);
                         if (definition.getNotify() && !previousIds.contains(id))
                         {
-                            notifier.notify(String.format(TEMPLATE_NOTIFY_WARNING, definition.getName()), TrayIcon.MessageType.WARNING);
+                            notifier.notify(String.format(TEMPLATE_NOTIFY_WARNING_OFFER, definition.getName()), TrayIcon.MessageType.WARNING);
                         }
                         currIds.add(id);
                     }
                 }
                 previousIds = currIds;
+                for (int i = 0; i < 28; ++i)
+                {
+                    final Widget child = widget.getChild(i);
+                    if (child == null)
+                    {
+                        continue;
+                    }
+                    int id = TradeHighlighterUtils.getUnnotedId(child.getItemId());
+                    if (child.getItemId() != -1 && definitions.containsKey(id))
+                    {
+                        HighlightDefinition def = definitions.get(id);
+                        offeredNameMap.put(def.getName().toLowerCase(), def);
+                    }
+                }
             }
         });
     }
@@ -122,8 +143,26 @@ public class TradeHighlightManager
     {
         if (evt.getGroupId() == TRADE_MENU)
         {
-            highlighted.clear();
+            TradeHighlighterUtils.getClientThread().invokeLater(() ->{
+                if (TradeHighlighterUtils.getWidget(InterfaceID.TRADECONFIRM, 0) != null)
+                {
+                    final String list = offeredNameMap.values().stream().filter(HighlightDefinition::getNotify)
+                            .map(HighlightDefinition::getName).reduce("", (acc, name) -> acc + ", " + name);
+                    if (!list.isBlank())
+                    {
+                        notifier.notify(String.format(TEMPLATE_NOTIFY_WARNING_CONFIRM, list.substring(2)), TrayIcon.MessageType.WARNING);
+                    }
+                }
+                else
+                {
+                    offeredNameMap.clear();
+                }
+            });
             previousIds.clear();
+        }
+        else if (evt.getGroupId() == InterfaceID.TRADECONFIRM)
+        {
+            offeredNameMap.clear();
         }
     }
 
@@ -164,7 +203,7 @@ public class TradeHighlightManager
         });
     }
 
-    public ArrayList<Widget> getHighlighted() { return highlighted; }
+    public HashMap<String, HighlightDefinition> getOfferedNameMap() { return offeredNameMap; }
     public boolean hasDefinition(int itemId)
     {
         return definitions.containsKey(itemId);
