@@ -79,6 +79,22 @@ public interface TradeHighligherConfig extends Config
 	default boolean enableConfirmNotifications() { return true; }
 
 	@ConfigItem(
+			keyName = "enableConfirmHighlight",
+			name = "Enable confirm highlight",
+			description = "If true, item names with highlight definitions offered by the other player in the trade confirmation window will be highlighted",
+			section = SECTION_GENERAL
+	)
+	default boolean enableConfirmHighlight() { return true; }
+
+	@ConfigItem(
+			keyName = "enableOfferHighlight",
+			name = "Enable offer highlight",
+			description = "If true, items with highlight definitions offered by the other player in the trade confirmation window will be highlighted",
+			section = SECTION_GENERAL
+	)
+	default boolean enableOfferHighlight() { return true; }
+
+	@ConfigItem(
 			keyName = "defaultColor",
 			name = "Default color",
 			description = "The default color set when adding a new highlight definition",

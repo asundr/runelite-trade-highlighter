@@ -19,7 +19,7 @@ public class HighlightOfferOverlay extends WidgetItemOverlay
     @Override
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem widgetItem)
     {
-        if (tradeManager == null)
+        if (tradeManager == null || !TradeHighlighterUtils.getConfig().enableOfferHighlight())
         {
             return;
         }

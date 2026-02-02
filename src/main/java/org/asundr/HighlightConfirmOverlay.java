@@ -48,6 +48,10 @@ public class HighlightConfirmOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
+        if (!TradeHighlighterUtils.getConfig().enableConfirmHighlight())
+        {
+            return null;
+        }
         final Widget confirmWidgetOther = TradeHighlighterUtils.getWidget(InterfaceID.TRADECONFIRM, 29);
         if (confirmWidgetOther == null)
         {
