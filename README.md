@@ -5,6 +5,8 @@
 ### Usage
 * Use the plugin panel to add new highlight definitions for items
 * Each item can have one definition that specifies highlight color and whether to notify if detected
+* Configuration options to highlight and notify on both trade offer and confirmation screens
+* Handles tradeable non-GE items. If any items are missed their IDs can be entered in the Advanced config section. Please make an issue for such unhandled items on the plugin's [github](https://github.com/asundr/runelite-trade-highlighter/issues) page.
 
 <hr>
 
