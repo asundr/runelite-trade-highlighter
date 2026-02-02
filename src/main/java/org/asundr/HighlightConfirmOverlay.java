@@ -31,6 +31,8 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 
 import java.awt.*;
+import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HighlightConfirmOverlay extends Overlay
@@ -57,14 +59,13 @@ public class HighlightConfirmOverlay extends Overlay
         {
             return  null;
         }
-        for (int i = 0; i < 28; ++i)
+        for (final Widget child : Objects.requireNonNull(confirmWidgetOther.getChildren()))
         {
-            final Widget child = confirmWidgetOther.getChild(i);
             if (child == null)
             {
                 continue;
             }
-            final java.util.regex.Matcher matcher = p.matcher(child.getText());
+            final Matcher matcher = p.matcher(child.getText());
             if (matcher.find())
             {
                 final String name = matcher.group(1).toLowerCase();

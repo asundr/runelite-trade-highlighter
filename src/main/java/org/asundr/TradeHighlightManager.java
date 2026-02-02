@@ -99,39 +99,25 @@ public class TradeHighlightManager
         offeredNameMap.clear();
         TradeHighlighterUtils.getClientThread().invokeLater(() ->
         {
-            final HashSet<Integer> currIds = new HashSet<>();
+            final HashSet<Integer> currentIds = new HashSet<>();
             final Widget widget = TradeHighlighterUtils.getWidget(TRADE_MENU, TRADE_OTHER_CHILD_ID);
             if (widget != null)
             {
-                for (Widget child : Objects.requireNonNull(widget.getChildren()))
+                for (final Widget child : Objects.requireNonNull(widget.getChildren()))
                 {
                     final int id = TradeHighlighterUtils.getUnnotedId(child.getItemId());
-
-                    if (definitions.containsKey(id))
+                    if (id != -1 && definitions.containsKey(id))
                     {
                         final HighlightDefinition definition = definitions.get(id);
+                        offeredNameMap.put(definition.getName().toLowerCase(), definition);
+                        currentIds.add(id);
                         if (TradeHighlighterUtils.getConfig().enableOfferNotifications() && definition.getNotify() && !previousIds.contains(id))
                         {
                             notifier.notify(String.format(TEMPLATE_NOTIFY_WARNING_OFFER, definition.getName()), TrayIcon.MessageType.WARNING);
                         }
-                        currIds.add(id);
                     }
                 }
-                previousIds = currIds;
-                for (int i = 0; i < 28; ++i)
-                {
-                    final Widget child = widget.getChild(i);
-                    if (child == null)
-                    {
-                        continue;
-                    }
-                    int id = TradeHighlighterUtils.getUnnotedId(child.getItemId());
-                    if (child.getItemId() != -1 && definitions.containsKey(id))
-                    {
-                        HighlightDefinition def = definitions.get(id);
-                        offeredNameMap.put(def.getName().toLowerCase(), def);
-                    }
-                }
+                previousIds = currentIds;
             }
         });
     }

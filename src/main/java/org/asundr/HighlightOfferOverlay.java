@@ -32,7 +32,7 @@ public class HighlightOfferOverlay extends WidgetItemOverlay
         {
             final HighlightDefinition definition = tradeManager.getDefinition(itemId);
             final Rectangle bounds = widgetItem.getCanvasBounds();
-            bounds.y += -2;
+            bounds.y += -1;
             bounds.height += 2;
             bounds.x += -1;
             bounds.width += 1;
