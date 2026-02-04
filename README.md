@@ -2,11 +2,14 @@
 
  This RuneLite plugin adds configurable highlights for items in the player trade menu and can be useful for scam prevention. 
 
+![image](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/trade-highlighter)
+![image](https://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/trade-highlighter)
+
 ### Usage
 * Use the plugin panel to add new highlight definitions for items
 * Each item can have one definition that specifies highlight color and whether to notify if detected
 * Configuration options to highlight and notify on both trade offer and confirmation screens
-* Handles tradeable non-GE items. If any items are missed their IDs can be entered in the Advanced config section. Please make an issue for such unhandled items on the plugin's [github](https://github.com/asundr/runelite-trade-highlighter/issues) page.
+* Handles tradeable non-GE items. If any items are missed their IDs can be entered in the Advanced config section. Please make an issue for such unhandled items on the plugin's [GitHub](https://github.com/asundr/runelite-trade-highlighter/issues) page.
 
 <hr>
 

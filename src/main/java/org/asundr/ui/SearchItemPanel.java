@@ -35,19 +35,21 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class SearchItemPanel extends JButton
+public class SearchItemPanel extends JPanel
 {
     private static final int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SIZE_SCROLL_PANEL_WIDTH;
     private static final int SIZE_SPACING = 6;
-    private static final int SIZE_VERTICAL = 36;
+    private static final int SIZE_VERTICAL = 38;
     private final static int SIZE_VERTICAL_FULL = SIZE_VERTICAL + SIZE_SPACING;
     private final static int SIZE_IMAGE_X = SIZE_VERTICAL_FULL + 6;
     private final static int SIZE_PLUS_X = 20;
     private final static int SIZE_NAME_X = SIZE_HORIZONTAL - SIZE_IMAGE_X - SIZE_PLUS_X;
     private final Dimension DIMENSION_PANEL = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
-    private final Dimension DIMENSION_IMAGE_ICON = new Dimension(SIZE_IMAGE_X, SIZE_VERTICAL_FULL);
+    private final Dimension DIMENSION_BUTTON = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL);
+    private final Dimension DIMENSION_IMAGE_ICON = new Dimension(SIZE_IMAGE_X, SIZE_VERTICAL);
     private final Dimension DIMENSION_PLUS = new Dimension(SIZE_PLUS_X, SIZE_VERTICAL_FULL);
     private final Dimension DIMENSION_ITEM_NAME = new Dimension(SIZE_NAME_X - 15, SIZE_VERTICAL_FULL);
+    private final Color COLOR_TRANSPARENT = new Color(0, 0, 0, 0);
     private final Color COLOR_PLUS_BACKGROUND = new Color(0, 90, 0);
     private final static Border BORDER_PANEL_EMPTY = BorderFactory.createEmptyBorder(0, 0, SIZE_SPACING, 0);
     private final static Border BORDER_PLUS_EMPTY = BorderFactory.createEmptyBorder(5, 0, 5, 0);
@@ -63,7 +65,6 @@ public class SearchItemPanel extends JButton
         this.itemId = itemId;
         this.itemName = itemName;
         buildPanel();
-        addActionListener(this::onButtonPressed);
     }
 
     private void buildPanel()
@@ -73,7 +74,15 @@ public class SearchItemPanel extends JButton
         TradeHighlighterUtils.setFixedSize(this, DIMENSION_PANEL);
         setBorder(BORDER_PANEL_EMPTY);
         setBackground(ColorScheme.DARK_GRAY_COLOR);
-        setToolTipText(String.format(TEMPLATE_PANEL_TOOLTIP, itemName));
+
+        // button container
+        final JButton button = new JButton();
+        button.addActionListener(this::onButtonPressed);
+        TradeHighlighterUtils.setFixedSize(button, DIMENSION_BUTTON);
+        button.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        button.setLayout(new BorderLayout());
+        button.setBorder(BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
+        button.setToolTipText(String.format(TEMPLATE_PANEL_TOOLTIP, itemName));
 
         // item image
         final JPanel itemWrapper = new JPanel();
@@ -81,7 +90,7 @@ public class SearchItemPanel extends JButton
         final AsyncBufferedImage img = TradeHighlighterUtils.getItemManager().getImage(itemId, Integer.MAX_VALUE, false);
         img.addTo(itemLabel);
         TradeHighlighterUtils.setFixedSize(itemWrapper, DIMENSION_IMAGE_ICON);
-        itemWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        itemWrapper.setBackground(COLOR_TRANSPARENT);
         itemWrapper.add(itemLabel);
 
         // item name
@@ -89,7 +98,7 @@ public class SearchItemPanel extends JButton
         final JLabel nameLabel = new JLabel(itemName);
         nameWrapper.setLayout(new BoxLayout(nameWrapper, BoxLayout.X_AXIS));
         nameWrapper.add(nameLabel);
-        nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameWrapper.setBackground(COLOR_TRANSPARENT);
         TradeHighlighterUtils.setFixedSize(nameWrapper, DIMENSION_ITEM_NAME);
         TradeHighlighterUtils.setFixedSize(nameLabel, DIMENSION_ITEM_NAME);
 
@@ -101,9 +110,10 @@ public class SearchItemPanel extends JButton
         plusWrapper.setBackground(COLOR_PLUS_BACKGROUND);
         plusWrapper.setPreferredSize(DIMENSION_PLUS);
 
-        add(itemWrapper, BorderLayout.WEST);
-        add(nameWrapper, BorderLayout.CENTER);
-        add(plusWrapper, BorderLayout.EAST);
+        button.add(itemWrapper, BorderLayout.WEST);
+        button.add(nameWrapper, BorderLayout.CENTER);
+        button.add(plusWrapper, BorderLayout.EAST);
+        add(button);
     }
 
     protected void onButtonPressed(ActionEvent e)
