@@ -58,7 +58,7 @@ public class HighlightDefinitionPanel extends JPanel
     private static final Dimension DIMENSION_DELETE_BUTTON = new Dimension(SIZE_DELETE_X, SIZE_VERTICAL_FULL);
     private static final Dimension DIMENSION_PANEL = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
     private static final Dimension PREFERRED_DIMENSION_TEXT = new Dimension(SIZE_NAME_X, SIZE_VERTICAL);
-    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, SPACING_VERTICAL, 0);
+    private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(SPACING_VERTICAL/2, 0, SPACING_VERTICAL/2, 0);
     private final static Border BORDER_ITEM_PADDING = BorderFactory.createEmptyBorder(0, SIZE_IMAGE_PADDING_LEFT, SIZE_IMAGE_PADDING_BOTTOM, 0);
     private final static Border BORDER_NAME_PADDING = BorderFactory.createEmptyBorder(0, 0, SIZE_NAME_PADDING_BOTTOM, 0);
     private final static Border BORDER_NOTIFY = BorderFactory.createLineBorder(ColorScheme.MEDIUM_GRAY_COLOR);

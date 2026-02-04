@@ -52,7 +52,7 @@ public class SearchItemPanel extends JPanel
     private final Dimension DIMENSION_ITEM_NAME = new Dimension(SIZE_NAME_X - 15, SIZE_VERTICAL_FULL);
     private final Color COLOR_TRANSPARENT = new Color(0, 0, 0, 0);
     private final Color COLOR_PLUS_BACKGROUND = new Color(0, 90, 0);
-    private final static Border BORDER_PANEL_EMPTY = BorderFactory.createEmptyBorder(0, 0, SIZE_SPACING, 0);
+    private final static Border BORDER_PANEL_EMPTY = BorderFactory.createEmptyBorder(SIZE_SPACING/2, 0, SIZE_SPACING/2, 0);
     private final static Border BORDER_PLUS_EMPTY = BorderFactory.createEmptyBorder(5, 0, 5, 0);
     private final static Border BORDER_IMAGE_PADDING = BorderFactory.createEmptyBorder(0, 0, SIZE_IMAGE_PADDING_BOTTOM, 0);
     private final static String TEXT_PLUS = "<html><b>+</b></html>";

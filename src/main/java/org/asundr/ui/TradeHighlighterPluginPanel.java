@@ -71,7 +71,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private static final Color COLOR_BORDER_SHADOW = new Color(25, 25,25);
     private static final Color COLOR_BORDER_HIGHLIGHT = new Color(50,50,50);
     private static final Border BORDER_TITLE_TEXT_PADDING = BorderFactory.createEmptyBorder(3, 0, 0, 0);
-    private static final Border BORDER_TITLE_WRAPPER = BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDER_SHADOW);
+    private static final Border BORDER_TITLE_WRAPPER = BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDER_HIGHLIGHT);
     private static final Border BORDER_MAIN_PANEL = BorderFactory.createMatteBorder(2, 0, 0, 0, COLOR_BORDER_SHADOW);
     private static final Border BORDER_MAIN_LIST_PADDING = BorderFactory.createEmptyBorder(0, SIZE_PANEL_PADDING_LEFT, 0, SIZE_PANEL_PADDING_RIGHT);
     private static final Border BORDER_SEARCH_FOOTER = BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER_HIGHLIGHT);
