@@ -55,8 +55,9 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         ADD_NEW
     }
     private static final int SIZE_SCROLLBAR_X = 6;
-    private static final int SIZE_PANEL_PADDING_X = 10;
-    static final int SIZE_SCROLL_PANEL_WIDTH =  PANEL_WIDTH - SIZE_PANEL_PADDING_X;
+    private static final int SIZE_PANEL_PADDING_LEFT = 4;
+    private static final int SIZE_PANEL_PADDING_RIGHT = 0;
+    static final int SIZE_SCROLL_PANEL_WIDTH =  PANEL_WIDTH - SIZE_PANEL_PADDING_LEFT - SIZE_PANEL_PADDING_RIGHT;
     private static final int SIZE_TITLE_Y = 30;
     private static final int SIZE_SEARCH_FOOTER = 35;
     private static final Dimension DIMENSION_SCROLL_BAR = new Dimension(SIZE_SCROLLBAR_X, Integer.MAX_VALUE);
@@ -68,7 +69,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private static final Border BORDER_TITLE_TEXT_PADDING = BorderFactory.createEmptyBorder(3, 0, 0, 0);
     private static final Border BORDER_TITLE_WRAPPER = BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_TITLE_BORDER);
     private static final Border BORDER_MAIN_PANEL = BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.DARKER_GRAY_COLOR);
-    private static final Border BORDER_MAIN_LIST_PADDING = BorderFactory.createEmptyBorder(0, SIZE_PANEL_PADDING_X, 0, 0);
+    private static final Border BORDER_MAIN_LIST_PADDING = BorderFactory.createEmptyBorder(0, SIZE_PANEL_PADDING_LEFT, 0, SIZE_PANEL_PADDING_RIGHT);
     private static final Border BORDER_SEARCH_FOOTER = BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.DARKER_GRAY_COLOR);
     private static final Border BORDER_SEARCH_FOOTER_PADDING = BorderFactory.createEmptyBorder(8, 0, 8, 0);
     private static final String TEXT_TITLE = "<html><span style='font-size:16'><b><nobr>Trade Highlighter</nobr></b></span><html><br>";
@@ -141,13 +142,13 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private void buildDefinitionsPanel()
     {
         definitionsMainPanel.setLayout(new BorderLayout());
-        definitionsMainPanel.setBorder(BORDER_MAIN_PANEL);
 
         // main panel
-        definitionListPanel.setLayout(new BoxLayout(definitionListPanel, BoxLayout.Y_AXIS));
         final JScrollPane definitionHistoryScroll = new JScrollPane(definitionListPanel);
-        definitionHistoryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        definitionHistoryScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         definitionHistoryScroll.setPreferredSize(DIMENSION_SCROLL_PANEL);
+        definitionHistoryScroll.setBorder(BORDER_MAIN_PANEL);
+        definitionListPanel.setLayout(new BoxLayout(definitionListPanel, BoxLayout.Y_AXIS));
         definitionListPanel.setPreferredSize(DIMENSION_SCROLL_PANEL_EMPTY);
         definitionListPanel.setBorder(BORDER_MAIN_LIST_PADDING);
 
@@ -164,6 +165,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     {
         searchMainPanel.setLayout(new BorderLayout());
 
+        // toolbar
         final JPanel toolbar = new JPanel();
         itemSearchBar.setIcon(IconTextField.Icon.SEARCH);
         itemSearchBar.addActionListener(e -> searchExecutor.execute(this::updateSearchList));
@@ -172,14 +174,16 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         itemSearchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         toolbar.add(itemSearchBar);
 
+        // main panel
         final JScrollPane searchListScroll = new JScrollPane(searchListPanel);
-        searchListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        searchListScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         searchListScroll.setPreferredSize(DIMENSION_SCROLL_PANEL);
         searchListScroll.setBorder(BORDER_MAIN_PANEL);
         searchListPanel.setLayout(new BoxLayout(searchListPanel, BoxLayout.Y_AXIS));
         searchListPanel.setPreferredSize(DIMENSION_SCROLL_PANEL_EMPTY);
         searchListPanel.setBorder(BORDER_MAIN_LIST_PADDING);
 
+        // footer
         final Dimension footerDimension = new Dimension(PANEL_WIDTH, SIZE_SEARCH_FOOTER);
         searchFooterPanel.setPreferredSize(footerDimension);
         searchFooterPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
