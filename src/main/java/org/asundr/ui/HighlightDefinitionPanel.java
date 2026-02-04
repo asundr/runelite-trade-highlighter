@@ -42,11 +42,14 @@ public class HighlightDefinitionPanel extends JPanel
     private static final int SIZE_DELETE_X = 20;
     private static final int SIZE_VERTICAL_FULL = SIZE_VERTICAL + SPACING_VERTICAL;
     private static final int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SIZE_SCROLL_PANEL_WIDTH;
-    private static final int SIZE_ITEM_ICON_X = SIZE_VERTICAL - 2;
+    private static final int SIZE_ITEM_ICON_X = SIZE_VERTICAL + 2;
+    private final static int SIZE_IMAGE_PADDING_LEFT = 4;
+    private final static int SIZE_IMAGE_PADDING_BOTTOM = 3;
     private static final int SIZE_COLOR_SELECTOR = SIZE_VERTICAL - 16;
     private static final int SIZE_OPTION_X = 25;
     private static final int SIZE_CONTENTS_X = SIZE_HORIZONTAL - SIZE_ITEM_ICON_X - SIZE_DELETE_X;
     private static final int SIZE_NAME_X = SIZE_CONTENTS_X - 2 * SIZE_OPTION_X - 20; // was 85
+    private static final int SIZE_NAME_PADDING_BOTTOM = SIZE_VERTICAL / 2 - 2;
     private static final Dimension DIMENSION_COLOR_BUTTON = new Dimension(SIZE_COLOR_SELECTOR, SIZE_COLOR_SELECTOR);
     private static final Dimension DIMENSION_COLOR_BUTTON_WRAPPER = new Dimension(SIZE_OPTION_X, SIZE_VERTICAL);
     private static final Dimension DIMENSION_ITEM_ICON = new Dimension(SIZE_ITEM_ICON_X, SIZE_VERTICAL);
@@ -56,7 +59,8 @@ public class HighlightDefinitionPanel extends JPanel
     private static final Dimension DIMENSION_PANEL = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
     private static final Dimension PREFERRED_DIMENSION_TEXT = new Dimension(SIZE_NAME_X, SIZE_VERTICAL);
     private final static Border BORDER_EMPTY = BorderFactory.createEmptyBorder(0, 0, SPACING_VERTICAL, 0);
-    private final static Border BORDER_NAME_PADDING = BorderFactory.createEmptyBorder(0, 0, 16, 0);
+    private final static Border BORDER_ITEM_PADDING = BorderFactory.createEmptyBorder(0, SIZE_IMAGE_PADDING_LEFT, SIZE_IMAGE_PADDING_BOTTOM, 0);
+    private final static Border BORDER_NAME_PADDING = BorderFactory.createEmptyBorder(0, 0, SIZE_NAME_PADDING_BOTTOM, 0);
     private final static Border BORDER_NOTIFY = BorderFactory.createLineBorder(ColorScheme.MEDIUM_GRAY_COLOR);
     private static final Color COLOR_BASE = new Color(30,30,30);
     private static final Color COLOR_DELETE_BUTTON = new Color(70, 0 ,0);
@@ -76,13 +80,13 @@ public class HighlightDefinitionPanel extends JPanel
     {
         this.definition = definition;
         buildPanel();
-        setBorder(BORDER_EMPTY);
     }
 
     private void buildPanel()
     {
         setLayout(new BorderLayout());
         TradeHighlighterUtils.setFixedSize(this, DIMENSION_PANEL);
+        setBorder(BORDER_EMPTY);
 
         // add item label, item name tooltip
         buildItemLabel();
@@ -108,6 +112,7 @@ public class HighlightDefinitionPanel extends JPanel
         img.addTo(itemLabel);
         itemWrapper.add(itemLabel);
         itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, definition.getColor(), BACKGROUND_COLOR_ALPHA));
+        itemWrapper.setBorder(BORDER_ITEM_PADDING);
         TradeHighlighterUtils.setFixedSize(itemWrapper, DIMENSION_ITEM_ICON);
         add(itemWrapper, BorderLayout.WEST);
     }

@@ -39,9 +39,10 @@ public class SearchItemPanel extends JPanel
 {
     private static final int SIZE_HORIZONTAL = TradeHighlighterPluginPanel.SIZE_SCROLL_PANEL_WIDTH;
     private static final int SIZE_SPACING = 6;
-    private static final int SIZE_VERTICAL = 38;
+    private static final int SIZE_VERTICAL = 40;
     private final static int SIZE_VERTICAL_FULL = SIZE_VERTICAL + SIZE_SPACING;
-    private final static int SIZE_IMAGE_X = SIZE_VERTICAL_FULL + 6;
+    private final static int SIZE_IMAGE_X = SIZE_VERTICAL + 2;
+    private final static int SIZE_IMAGE_PADDING_BOTTOM = 3;
     private final static int SIZE_PLUS_X = 20;
     private final static int SIZE_NAME_X = SIZE_HORIZONTAL - SIZE_IMAGE_X - SIZE_PLUS_X;
     private final Dimension DIMENSION_PANEL = new Dimension(SIZE_HORIZONTAL, SIZE_VERTICAL_FULL);
@@ -53,6 +54,7 @@ public class SearchItemPanel extends JPanel
     private final Color COLOR_PLUS_BACKGROUND = new Color(0, 90, 0);
     private final static Border BORDER_PANEL_EMPTY = BorderFactory.createEmptyBorder(0, 0, SIZE_SPACING, 0);
     private final static Border BORDER_PLUS_EMPTY = BorderFactory.createEmptyBorder(5, 0, 5, 0);
+    private final static Border BORDER_IMAGE_PADDING = BorderFactory.createEmptyBorder(0, 0, SIZE_IMAGE_PADDING_BOTTOM, 0);
     private final static String TEXT_PLUS = "<html><b>+</b></html>";
     private final static String TEMPLATE_PANEL_TOOLTIP = "Add definition for %s";
 
@@ -91,6 +93,7 @@ public class SearchItemPanel extends JPanel
         img.addTo(itemLabel);
         TradeHighlighterUtils.setFixedSize(itemWrapper, DIMENSION_IMAGE_ICON);
         itemWrapper.setBackground(COLOR_TRANSPARENT);
+        itemWrapper.setBorder(BORDER_IMAGE_PADDING);
         itemWrapper.add(itemLabel);
 
         // item name
