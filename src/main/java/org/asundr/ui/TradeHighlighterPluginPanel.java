@@ -63,14 +63,18 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private static final Dimension DIMENSION_SCROLL_BAR = new Dimension(SIZE_SCROLLBAR_X, Integer.MAX_VALUE);
     private static final Dimension DIMENSION_SCROLL_PANEL = new Dimension(SIZE_SCROLL_PANEL_WIDTH, Integer.MAX_VALUE);
     private static final Dimension DIMENSION_SCROLL_PANEL_EMPTY = new Dimension(SIZE_SCROLL_PANEL_WIDTH, 1);
+    private static final Dimension DIMENSION_QUERY_BAR = new Dimension(PANEL_WIDTH - 2, 28);
     private static final Color COLOR_TITLE_TEXT = Color.decode("#cccc06");
     private static final Color COLOR_TITLE_BORDER = Color.decode("#808000");
     private static final Color COLOR_TITLE_BACKGROUND = new Color(34, 34,34);
+    private static final Color COLOR_QUERY_BAR = new Color(25, 25,25);
+    private static final Color COLOR_BORDER_SHADOW = new Color(25, 25,25);
+    private static final Color COLOR_BORDER_HIGHLIGHT = new Color(50,50,50);
     private static final Border BORDER_TITLE_TEXT_PADDING = BorderFactory.createEmptyBorder(3, 0, 0, 0);
-    private static final Border BORDER_TITLE_WRAPPER = BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_TITLE_BORDER);
-    private static final Border BORDER_MAIN_PANEL = BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.DARKER_GRAY_COLOR);
+    private static final Border BORDER_TITLE_WRAPPER = BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDER_SHADOW);
+    private static final Border BORDER_MAIN_PANEL = BorderFactory.createMatteBorder(2, 0, 0, 0, COLOR_BORDER_SHADOW);
     private static final Border BORDER_MAIN_LIST_PADDING = BorderFactory.createEmptyBorder(0, SIZE_PANEL_PADDING_LEFT, 0, SIZE_PANEL_PADDING_RIGHT);
-    private static final Border BORDER_SEARCH_FOOTER = BorderFactory.createMatteBorder(1, 0, 0, 0, ColorScheme.DARKER_GRAY_COLOR);
+    private static final Border BORDER_SEARCH_FOOTER = BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_BORDER_HIGHLIGHT);
     private static final Border BORDER_SEARCH_FOOTER_PADDING = BorderFactory.createEmptyBorder(8, 0, 8, 0);
     private static final String TEXT_TITLE = "<html><span style='font-size:16'><b><nobr>Trade Highlighter</nobr></b></span><html><br>";
     private static final String TOOLTIP_TITLE = "Created by asundr";
@@ -169,9 +173,10 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         final JPanel toolbar = new JPanel();
         itemSearchBar.setIcon(IconTextField.Icon.SEARCH);
         itemSearchBar.addActionListener(e -> searchExecutor.execute(this::updateSearchList));
-        itemSearchBar.setPreferredSize(new Dimension(PANEL_WIDTH - 16, 32));
+        itemSearchBar.setPreferredSize(DIMENSION_QUERY_BAR);
         itemSearchBar.addClearListener(this::updateSearchList);
-        itemSearchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        itemSearchBar.setBackground(COLOR_QUERY_BAR);
+        toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
         toolbar.add(itemSearchBar);
 
         // main panel
