@@ -34,6 +34,8 @@ import org.asundr.TradeHighlighterUtils;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class HighlightDefinitionPanel extends JPanel
 {
@@ -73,8 +75,11 @@ public class HighlightDefinitionPanel extends JPanel
 
     //private static final ImageIcon ICON_NOTIFY = TradeHighlighterUtils.getIconFromName("notify.png", 20, 20, Image.SCALE_SMOOTH);
 
+    private static HighlightDefinitionPanel activePanel = null;
+    private static JPopupMenu popupMenu = null;
     private final HighlightDefinition definition;
     private final JPanel itemWrapper = new JPanel();
+    private final JButton colorButton = new JButton();
 
     public HighlightDefinitionPanel(HighlightDefinition definition)
     {
@@ -99,6 +104,19 @@ public class HighlightDefinitionPanel extends JPanel
         buildColorSelector(contents);
         buildNotifyCheckbox(contents);
         add(contents, BorderLayout.CENTER);
+        contents.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    activePanel = HighlightDefinitionPanel.this;
+                    if (popupMenu == null)
+                    {
+                        buildPopup();
+                    }
+                    popupMenu.show(contents, e.getX(), e.getY());
+                }
+            }
+        });
 
         // Add delete button
         buildDeleteButton();
@@ -135,7 +153,7 @@ public class HighlightDefinitionPanel extends JPanel
         colorButtonWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         TradeHighlighterUtils.setFixedSize(colorButtonWrapper, DIMENSION_COLOR_BUTTON_WRAPPER);
 
-        final JButton colorButton = new JButton();
+
         TradeHighlighterUtils.setFixedSize(colorButton, DIMENSION_COLOR_BUTTON);
         colorButton.setBackground(definition.getColor());
         colorButton.setToolTipText(TOOLTIP_COLOR_BUTTON);
@@ -144,9 +162,7 @@ public class HighlightDefinitionPanel extends JPanel
             final RuneliteColorPicker colorPicker = TradeHighlighterUtils.createColorPicker(definition.getColor(), TEXT_COLOR_PICKER_TITLE, true);
             colorPicker.setOnClose(c ->
             {
-                definition.setColor(c);
-                colorButton.setBackground(c);
-                itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, c, BACKGROUND_COLOR_ALPHA));
+                setColor(c);
                 TradeHighlighterUtils.saveDefinitions();
             });
             colorPicker.setLocationRelativeTo(colorButton);
@@ -187,6 +203,40 @@ public class HighlightDefinitionPanel extends JPanel
         deleteButton.setBackground(COLOR_DELETE_BUTTON);
         deleteButton.setBorderPainted(false);
         add(deleteButton, BorderLayout.EAST);
+    }
+
+    private void buildPopup()
+    {
+        popupMenu = new JPopupMenu();
+
+        final JMenu copySubmenu = new JMenu("Copy");
+        JMenuItem copyColor = new JMenuItem("Color");
+        copyColor.addActionListener(e -> TradeHighlighterUtils.copyToClipboard(TradeHighlighterUtils.colorToHexString(activePanel.getDefinition().getColor())));
+        copySubmenu.add(copyColor);
+
+
+        final JMenu pasteSubmenu = new JMenu("Paste");
+        JMenuItem pasteColor = new JMenuItem("Color");
+        pasteColor.addActionListener(e ->
+        {
+            final String hexString = TradeHighlighterUtils.getFromClipboard();
+            if (hexString != null && hexString.matches("^#[\\da-fA-F]{1,8}$"))
+            {
+                activePanel.setColor(Color.decode(hexString));
+                TradeHighlighterUtils.saveDefinitions();
+            }
+        });
+        pasteSubmenu.add(pasteColor);
+
+        popupMenu.add(copySubmenu);
+        popupMenu.add(pasteSubmenu);
+    }
+
+    private void setColor(final Color color)
+    {
+        definition.setColor(color);
+        colorButton.setBackground(color);
+        itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, color, BACKGROUND_COLOR_ALPHA));
     }
 
     public HighlightDefinition getDefinition() { return definition; }

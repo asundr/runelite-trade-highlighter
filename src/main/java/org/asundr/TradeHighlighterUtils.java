@@ -44,7 +44,12 @@ import org.asundr.ui.SearchItemPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -183,5 +188,30 @@ public class TradeHighlighterUtils
         final ItemComposition itemComp = TradeHighlighterUtils.getItemManager().getItemComposition(id);
         return itemComp.getNote() == -1 ? id : itemComp.getLinkedNoteId();
     }
+
+    // Copies the passed String to the user's clipboard
+    public static void copyToClipboard(final String content)
+    {
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(content), null);
+    }
+
+    public static String getFromClipboard()
+    {
+        try
+        {
+            Transferable data = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+            return (String)data.getTransferData(DataFlavor.stringFlavor);
+        }
+        catch (IOException | UnsupportedFlavorException ignored)
+        {
+            return null;
+        }
+    }
+
+    public static String colorToHexString(final Color color, final boolean includeHash)
+    {
+        return (includeHash?"#":"") + String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+    }
+    public static String colorToHexString(final Color color) { return colorToHexString(color, true);}
 
 }
