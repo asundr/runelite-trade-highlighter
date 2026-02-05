@@ -198,7 +198,7 @@ public class HighlightDefinitionPanel extends JPanel
     {
         JButton deleteButton = new JButton(TEXT_DELETE_SYMBOL);
         deleteButton.setPreferredSize(DIMENSION_DELETE_BUTTON);
-        deleteButton.addActionListener(e -> TradeHighlighterUtils.getTradeHighlightManager().removeDefinition(definition.getId()));
+        deleteButton.addActionListener(e -> deleteDefinition());
         deleteButton.setToolTipText(String.format(TEMPLATE_TOOLTIP_DELETE, definition.getName()));
         deleteButton.setBackground(COLOR_DELETE_BUTTON);
         deleteButton.setBorderPainted(false);
@@ -214,7 +214,6 @@ public class HighlightDefinitionPanel extends JPanel
         copyColor.addActionListener(e -> TradeHighlighterUtils.copyToClipboard(TradeHighlighterUtils.colorToHexString(activePanel.getDefinition().getColor())));
         copySubmenu.add(copyColor);
 
-
         final JMenu pasteSubmenu = new JMenu("Paste");
         JMenuItem pasteColor = new JMenuItem("Color");
         pasteColor.addActionListener(e ->
@@ -228,8 +227,13 @@ public class HighlightDefinitionPanel extends JPanel
         });
         pasteSubmenu.add(pasteColor);
 
+        final JMenuItem deleteItem = new JMenuItem("<html><span style='color:red'>Delete</span></html>");
+        deleteItem.addActionListener(e -> activePanel.deleteDefinition());
+
         popupMenu.add(copySubmenu);
         popupMenu.add(pasteSubmenu);
+        popupMenu.addSeparator();
+        popupMenu.add(deleteItem);
     }
 
     private void setColor(final Color color)
@@ -237,6 +241,11 @@ public class HighlightDefinitionPanel extends JPanel
         definition.setColor(color);
         colorButton.setBackground(color);
         itemWrapper.setBackground(TradeHighlighterUtils.lerp(COLOR_BASE, color, BACKGROUND_COLOR_ALPHA));
+    }
+
+    private void deleteDefinition()
+    {
+        TradeHighlighterUtils.getTradeHighlightManager().removeDefinition(definition.getId());
     }
 
     public HighlightDefinition getDefinition() { return definition; }
