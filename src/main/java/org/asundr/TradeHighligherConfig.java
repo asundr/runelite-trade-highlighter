@@ -95,6 +95,14 @@ public interface TradeHighligherConfig extends Config
 	default boolean enableOfferHighlight() { return true; }
 
 	@ConfigItem(
+			keyName = "switchToDefinitionOnAdd",
+			name = "Switch ot definition on add",
+			description = "If true, automatically switches to definitions tab when new definition is added",
+			section = SECTION_GENERAL
+	)
+	default boolean switchToDefinitionOnAdd() { return true; }
+
+	@ConfigItem(
 			keyName = "defaultColor",
 			name = "Default color",
 			description = "The default color set when adding a new highlight definition",

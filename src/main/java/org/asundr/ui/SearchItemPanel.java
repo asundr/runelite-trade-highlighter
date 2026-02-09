@@ -124,7 +124,10 @@ public class SearchItemPanel extends JPanel
         final HighlightDefinition definition = new HighlightDefinition(itemId, TradeHighlighterUtils.getConfig().defaultColor(), TradeHighlighterUtils.getConfig().defaultNotify());
         definition.setName(itemName);
         TradeHighlighterUtils.getTradeHighlightManager().addDefinition(definition);
-        TradeHighlighterPluginPanel.setTab(TradeHighlighterPluginPanel.PanelTab.DEFINITIONS);
+        if (TradeHighlighterUtils.getConfig().switchToDefinitionOnAdd())
+        {
+            TradeHighlighterPluginPanel.setTab(TradeHighlighterPluginPanel.PanelTab.DEFINITIONS);
+        }
         setVisible(false);
     }
 
