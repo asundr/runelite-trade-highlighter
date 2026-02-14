@@ -103,7 +103,12 @@ public class TradeHighlightManager
             final Widget widget = TradeHighlighterUtils.getWidget(TRADE_MENU, TRADE_OTHER_CHILD_ID);
             if (widget != null)
             {
-                for (final Widget child : Objects.requireNonNull(widget.getChildren()))
+                final Widget[] children = widget.getChildren();
+                if (children == null)
+                {
+                    return;
+                }
+                for (final Widget child : children)
                 {
                     final int id = TradeHighlighterUtils.getUnnotedId(child.getItemId());
                     if (id != -1 && definitions.containsKey(id))
