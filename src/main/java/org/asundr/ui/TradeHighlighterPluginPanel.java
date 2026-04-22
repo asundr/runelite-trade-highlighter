@@ -86,7 +86,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private static TradeHighlightManager tradeHighlightManager;
 
     private static final ExecutorService searchExecutor = Executors.newFixedThreadPool(1);
-    private static final ScheduledExecutorService listExecutor = Executors.newScheduledThreadPool(1);
+    private static ScheduledExecutorService listExecutor = null;
     private static ScheduledFuture<?> listExecutorHandle = null;
 
     private final JPanel definitionsMainPanel = new JPanel();
@@ -115,6 +115,24 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         buildSearchPanel();
         tabGroup.select(definitionsTab);
         revalidate();
+    }
+
+    public static void initialize()
+    {
+        if (listExecutor == null)
+        {
+            listExecutor = Executors.newScheduledThreadPool(1);
+        }
+    }
+
+    public static void shutdown()
+    {
+        if (listExecutor != null)
+        {
+            listExecutor.shutdownNow();
+            listExecutor = null;
+        }
+        listExecutorHandle = null;
     }
 
     @Subscribe private void onEventDefinitionAdded(EventDefinitionAdded evt) { addDefinitionPanel(evt.getDefinition()); }
@@ -333,7 +351,8 @@ public class TradeHighlighterPluginPanel extends PluginPanel
             }
             updateDefinitionPanelSize();
             SwingUtilities.invokeLater(definitionListPanel::updateUI);
-            if (listExecutorHandle != null) {
+            if (listExecutorHandle != null)
+            {
                 listExecutorHandle.cancel(true);
                 listExecutorHandle = null;
             }

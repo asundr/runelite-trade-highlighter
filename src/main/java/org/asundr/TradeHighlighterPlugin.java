@@ -77,6 +77,7 @@ public class TradeHighlighterPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		TradeHighlighterUtils.initialize(config, configManager, client, clientThread, itemManager, colorPickerManager, gson);
+		TradeHighlighterPluginPanel.initialize();
 		ItemIdUtils.rebuildNonGeItemData();
 		tradeHighlightManager = new TradeHighlightManager(overlayManager, eventBus, notifier);
 		TradeHighlighterUtils.setTradeHighlightManager(tradeHighlightManager);
@@ -92,6 +93,7 @@ public class TradeHighlighterPlugin extends Plugin
 		eventBus.unregister(mainPanel);
 		tradeHighlightManager.shutdown();
 		clientToolbar.removeNavigation(navigationButton);
+		TradeHighlighterPluginPanel.shutdown();
 	}
 
 	private void addNavigationButton(final TradeHighlighterPluginPanel mainPanel)
