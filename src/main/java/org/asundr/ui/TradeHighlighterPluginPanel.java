@@ -85,7 +85,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private static TradeHighlighterPluginPanel instance;
     private static TradeHighlightManager tradeHighlightManager;
 
-    private static final ExecutorService searchExecutor = Executors.newFixedThreadPool(1);
+    private static ExecutorService searchExecutor = null;
     private static ScheduledExecutorService listExecutor = null;
     private static ScheduledFuture<?> listExecutorHandle = null;
 
@@ -123,10 +123,19 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         {
             listExecutor = Executors.newScheduledThreadPool(1);
         }
+        if (searchExecutor == null)
+        {
+            searchExecutor = Executors.newFixedThreadPool(1);
+        }
     }
 
     public static void shutdown()
     {
+        if (searchExecutor != null)
+        {
+            searchExecutor.shutdownNow();
+            searchExecutor = null;
+        }
         if (listExecutor != null)
         {
             listExecutor.shutdownNow();
