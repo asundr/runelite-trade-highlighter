@@ -214,4 +214,9 @@ public class TradeHighlighterUtils
     }
     public static String colorToHexString(final Color color) { return colorToHexString(color, true);}
 
+    public static boolean isThreadActive(java.util.concurrent.Future<?> future)
+    {
+        return future != null && !future.isCancelled() && !future.isDone();
+    }
+
 }

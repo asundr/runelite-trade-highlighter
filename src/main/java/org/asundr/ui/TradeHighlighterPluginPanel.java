@@ -42,8 +42,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -54,6 +53,7 @@ public class TradeHighlighterPluginPanel extends PluginPanel
         DEFINITIONS,
         ADD_NEW
     }
+    private static final int TIME_RESTART_DEFINITIONS_REFRESH = 30;
     private static final int SIZE_SCROLLBAR_X = 6;
     private static final int SIZE_PANEL_PADDING_LEFT = 4;
     private static final int SIZE_PANEL_PADDING_RIGHT = 0;
@@ -86,6 +86,8 @@ public class TradeHighlighterPluginPanel extends PluginPanel
     private static TradeHighlightManager tradeHighlightManager;
 
     private static final ExecutorService searchExecutor = Executors.newFixedThreadPool(1);
+    private static final ScheduledExecutorService listExecutor = Executors.newScheduledThreadPool(1);
+    private static ScheduledFuture<?> listExecutorHandle = null;
 
     private final JPanel definitionsMainPanel = new JPanel();
     private final JPanel searchMainPanel = new JPanel();
@@ -309,8 +311,21 @@ public class TradeHighlighterPluginPanel extends PluginPanel
 
     private void refreshDefinitionPanel(final HashMap<Integer, HighlightDefinition> definitions)
     {
+        // cancel existing stalled load operation
+        if (TradeHighlighterUtils.isThreadActive(listExecutorHandle))
+        {
+            listExecutorHandle.cancel(true);
+        }
+        // schedule timeout to retry adding all definitions, if  stalled after timeout
+        listExecutorHandle = listExecutor.schedule(() ->
+            {
+                log.info("TradeHighlighter:: {LOAD} Re-attempting refresh definitions panel");
+                SwingUtilities.invokeLater(()->  TradeHighlighterUtils.getClientThread().invokeLater(() -> refreshDefinitionPanel(definitions)));
+            }, TIME_RESTART_DEFINITIONS_REFRESH, TimeUnit.SECONDS);
+        // creates and adds definition panels
         final List<HighlightDefinition> sortedDefinitions = definitions.values().stream().sorted(COMPARATOR_HIGHLIGHT_DEFINITION).collect(Collectors.toList());
         SwingUtilities.invokeLater(()-> {
+            definitionListPanel.removeAll();
             for (HighlightDefinition definition : sortedDefinitions)
             {
                 final HighlightDefinitionPanel highlightDefinitionPanel = new HighlightDefinitionPanel(definition);
@@ -318,6 +333,10 @@ public class TradeHighlighterPluginPanel extends PluginPanel
             }
             updateDefinitionPanelSize();
             SwingUtilities.invokeLater(definitionListPanel::updateUI);
+            if (listExecutorHandle != null) {
+                listExecutorHandle.cancel(true);
+                listExecutorHandle = null;
+            }
         });
     }
 
